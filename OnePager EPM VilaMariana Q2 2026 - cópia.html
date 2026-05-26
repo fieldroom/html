@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One Pager — EPM Vila Mariana · Q2 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red:#B22234; --red-lt:#FAE5E5; --red-dk:#7A1525;
+      --navy:#1E3A5F; --navy-lt:#D6E4F0;
+      --cream:#FAF5EE; --amber:#B8860B; --amber-lt:#FDF3DC;
+      --green:#2E7D5B; --green-lt:#E8F5EE;
+      --white:#FFFFFF; --gray:#777; --border:#E5E0D8;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--cream);color:#222;font-size:14px;line-height:1.5}
+    nav{position:sticky;top:0;z-index:50;background:var(--navy);display:flex;align-items:center;gap:10px;padding:0 24px;height:46px;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+    .nav-logo{font-family:'DM Serif Display',serif;font-style:italic;color:#fff;font-size:15px}
+    .nav-title{color:rgba(255,255,255,.6);font-size:11px;flex:1}
+    .nav-links{display:flex;gap:3px}
+    .nav-link{color:rgba(255,255,255,.65);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;cursor:pointer;border:1px solid transparent;transition:all .15s;text-decoration:none}
+    .nav-link:hover,.nav-link.active{background:var(--red);color:#fff}
+    .page-header{background:linear-gradient(135deg,var(--red) 0%,var(--red-dk) 55%,var(--navy) 100%);padding:36px 40px 28px;color:#fff}
+    .header-eyebrow{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px}
+    .header-title{font-family:'DM Serif Display',serif;font-size:28px;line-height:1.2;margin-bottom:6px}
+    .header-title em{color:#FFAAAA;font-style:normal}
+    .header-sub{font-size:12px;color:rgba(255,255,255,.65);margin-bottom:14px}
+    .header-meta{font-size:10px;color:rgba(255,255,255,.4)}
+    .kpi-bar{background:var(--white);display:flex;border-bottom:2px solid var(--cream);overflow-x:auto}
+    .kpi-item{flex:1;min-width:110px;padding:12px 14px;text-align:center;border-right:1px solid var(--border)}
+    .kpi-item:last-child{border-right:none}
+    .kpi-val{font-size:21px;font-weight:700;line-height:1}
+    .kpi-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-top:2px}
+    .c-red{color:var(--red)} .c-green{color:var(--green)} .c-amber{color:var(--amber)} .c-navy{color:var(--navy)}
+    .wrapper{max-width:1080px;margin:0 auto;padding:32px 20px 72px}
+    .section{margin-bottom:44px;scroll-margin-top:58px}
+    .section-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .section-badge{background:var(--navy);color:#fff;font-size:10px;font-weight:600;letter-spacing:.3px;padding:3px 8px;border-radius:4px;white-space:nowrap}
+    .section-title{font-size:16px;font-weight:700;color:var(--navy)}
+    .section-sub{font-size:11px;color:var(--gray)}
+    .card{background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden}
+
+    /* TRÍADE */
+    .triade-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+    .triade-kpi{padding:16px 14px;border-right:1px solid var(--border)}
+    .triade-kpi:last-child{border-right:none}
+    .triade-kpi-lbl{font-size:10px;color:var(--gray);margin-bottom:2px}
+    .triade-kpi-val{font-size:26px;font-weight:700;line-height:1;margin-bottom:7px}
+    .triade-lines{display:flex;flex-direction:column;gap:3px}
+    .tl{font-size:11px;padding:2px 7px;border-radius:3px;font-weight:500}
+    .subhdr{background:var(--navy);color:#fff;padding:7px 16px;font-size:11px;font-weight:600}
+    .triade-tbl{width:100%;border-collapse:collapse}
+    .triade-tbl th{font-size:10px;color:var(--gray);font-weight:600;padding:7px 14px;border-bottom:1px solid var(--border);text-align:center}
+    .triade-tbl th:first-child{text-align:left}
+    .triade-tbl td{padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;text-align:center}
+    .triade-tbl td:first-child{text-align:left;font-weight:600}
+    .triade-tbl tr:last-child td{border-bottom:none}
+    .tr-terr td{color:var(--red);font-weight:700}
+    .note{padding:7px 16px;font-size:10px;color:var(--gray);border-top:1px solid var(--border)}
+
+    /* EXECUÇÃO */
+    .two-col{display:grid;grid-template-columns:1fr 1fr}
+    .col-left{border-right:1px solid var(--border)}
+    .cl-tbl{width:100%;border-collapse:collapse}
+    .cl-tbl th{font-size:10px;color:var(--gray);font-weight:600;padding:6px 14px;border-bottom:1px solid var(--border);text-align:center}
+    .cl-tbl th:first-child{text-align:left}
+    .cl-tbl td{padding:6px 14px;font-size:12px;text-align:center;border-bottom:1px solid var(--border)}
+    .cl-tbl td:first-child{text-align:left}
+    .cl-tbl tr.tot td{font-weight:700;background:#FAFAFA}
+    .cl-tbl tr.som td{font-weight:700;color:var(--green);background:#F5F9F6}
+    .cl-tbl tr:last-child td{border-bottom:none}
+    .cl-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+    .cb-c{background:var(--red-lt);color:var(--red)}
+    .cb-a{background:var(--amber-lt);color:var(--amber)}
+    .cb-b{background:var(--green-lt);color:var(--green)}
+    .lmpv-row{display:grid;grid-template-columns:repeat(3,1fr)}
+    .lmpv-cell{padding:11px 14px;text-align:center;border-right:1px solid var(--border)}
+    .lmpv-cell:last-child{border-right:none}
+    .lmpv-lbl{font-size:10px;color:var(--gray)}
+    .lmpv-val{font-size:20px;font-weight:700}
+    .lmpv-sub{font-size:10px;color:var(--gray);margin-top:1px}
+    .npac-tbl{width:100%;border-collapse:collapse}
+    .npac-tbl th{font-size:10px;color:var(--gray);font-weight:600;padding:6px 14px;border-bottom:1px solid var(--border);text-align:center}
+    .npac-tbl th:first-child{text-align:left}
+    .npac-tbl td{padding:7px 14px;font-size:12px;text-align:center;border-bottom:1px solid var(--border)}
+    .npac-tbl td:first-child{text-align:left}
+    .npac-tbl tr:last-child td{border-bottom:none;font-weight:700}
+    .hits-row{display:grid;grid-template-columns:1fr 1fr}
+    .hits-cell{padding:12px 16px;border-right:1px solid var(--border)}
+    .hits-cell:last-child{border-right:none}
+    .hits-lbl{font-size:10px;color:var(--gray);margin-bottom:3px}
+    .hits-nums{display:flex;align-items:baseline;gap:4px;margin-bottom:6px}
+    .hits-n{font-size:26px;font-weight:700}
+    .hits-d{font-size:13px;color:var(--gray)}
+    .prog{height:5px;background:#E8E8E8;border-radius:3px;overflow:hidden;margin-bottom:3px}
+    .prog-fill{height:100%;border-radius:3px}
+    .hits-pct{font-size:11px;font-weight:700}
+
+    /* PLANO DE AÇÃO — PILLS */
+    .plano-grid{display:grid;grid-template-columns:1fr 1fr}
+    .plano-col{border-right:1px solid var(--border)}
+    .plano-col:last-child{border-right:none}
+    .plano-bot{border-top:1px solid var(--border)}
+    .plano-hdr{padding:7px 16px;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#fff}
+    .ph-red{background:var(--red)} .ph-amber{background:var(--amber)}
+    .plano-body{padding:10px 14px;min-height:170px}
+    .pb-red{background:var(--red-lt)} .pb-amber{background:var(--amber-lt)}
+    .hcp{margin-bottom:11px}
+    .hcp:last-child{margin-bottom:0}
+    .hcp-n{font-size:12.5px;font-weight:700;color:#1A1A1A}
+    .hcp-s{font-size:12px;color:#666}
+    .hcp-obj{font-size:10.5px;color:#888;font-style:italic;margin:2px 0 4px}
+    .pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+    .pill{display:inline-block;font-size:10px;font-weight:500;padding:2px 9px;border-radius:12px;white-space:nowrap;border:1px solid}
+    .pr{background:var(--red-lt);color:var(--red);border-color:#E8B0B0}
+    .pa{background:var(--amber-lt);color:var(--amber);border-color:#E0C870}
+    .pn{background:var(--navy-lt);color:var(--navy);border-color:#A8C4DC}
+    .pg{background:var(--green-lt);color:var(--green);border-color:#90C8A8}
+    .hcp-more{font-size:10px;color:#777;padding:5px 8px;background:rgba(184,134,11,.06);border-radius:4px;margin-top:3px;border:1px solid rgba(184,134,11,.15)}
+
+    /* PONTOS */
+    .ponto{border-radius:8px;padding:13px 17px;margin-bottom:10px;border-left:4px solid}
+    .ponto:last-child{margin-bottom:0}
+    .pt-r{background:var(--red-lt);border-color:var(--red)}
+    .pt-a{background:var(--amber-lt);border-color:var(--amber)}
+    .pt-b{background:var(--navy-lt);border-color:var(--navy)}
+    .ponto-t{font-size:12.5px;font-weight:700;margin-bottom:7px}
+    .pt-r .ponto-t{color:var(--red)} .pt-a .ponto-t{color:var(--amber)} .pt-b .ponto-t{color:var(--navy)}
+    .ponto ul{padding-left:16px}
+    .ponto li{font-size:11.5px;color:#444;margin-bottom:4px;line-height:1.5}
+
+    /* RESUMO */
+    .exec-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+    .ec{border-radius:8px;padding:13px 15px;border-left:4px solid}
+    .ec-g{background:var(--green-lt);border-color:var(--green)}
+    .ec-a{background:var(--amber-lt);border-color:var(--amber)}
+    .ec-n{background:var(--navy-lt);border-color:var(--navy)}
+    .ec-t{font-size:11px;font-weight:700;margin-bottom:5px}
+    .ec-g .ec-t{color:var(--green)} .ec-a .ec-t{color:var(--amber)} .ec-n .ec-t{color:var(--navy)}
+    .ec-p{font-size:11.5px;color:#444;line-height:1.5}
+    .top3-hdr{background:var(--navy);color:#fff;padding:8px 17px;font-size:12px;font-weight:600;border-radius:6px 6px 0 0}
+    .top3{border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;overflow:hidden}
+    .t3i{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+    .t3i:last-child{border-bottom:none}
+    .t3n{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px}
+    .n1{background:var(--red)} .n2{background:var(--navy)} .n3{background:var(--green)}
+    .t3t{font-size:12px;font-weight:700;margin-bottom:3px}
+    .t3d{font-size:11px;color:#555;line-height:1.5}
+    footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:16px;font-size:10px}
+    footer strong{font-family:'DM Serif Display',serif;font-style:italic;color:#fff;font-size:14px;display:block;margin-bottom:2px}
+    @media(max-width:700px){
+      .triade-grid,.two-col,.plano-grid,.exec-3,.hits-row,.lmpv-row{grid-template-columns:1fr}
+      .col-left,.plano-col{border-right:none;border-bottom:1px solid var(--border)}
+      .nav-links{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">Lilly</span>
+  <span class="nav-title">· EPM Vila Mariana · Q2 2026 · Stop &amp; Go MAIO</span>
+  <div class="nav-links">
+    <a class="nav-link" href="#triade">Tríade</a>
+    <a class="nav-link" href="#execucao">Execução</a>
+    <a class="nav-link" href="#plano">Plano de Ação</a>
+    <a class="nav-link" href="#pontos">Pontos de Atenção</a>
+    <a class="nav-link" href="#resumo">Resumo</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="header-eyebrow">Business Review · Distrito SP2</div>
+  <div class="header-title">EPM Vila Mariana — <em>Consolidar Liderança</em> · Q2 2026</div>
+  <div class="header-sub">Análise de performance, execução de campo e plano de ação Mai–Jul 2026</div>
+  <div class="header-meta">João Pedro Alonso Adolpho · Representante · Distrito SP2 · Maio 2026 &nbsp;·&nbsp; Dados: MDTR IQVIA · GPS IQVIA · Base Março 2026 · Parcial Maio até 10/05</div>
+</div>
+
+<div class="kpi-bar">
+  <div class="kpi-item"><div class="kpi-val c-red">41,9%</div><div class="kpi-lbl">SOM DoT YTD</div></div>
+  <div class="kpi-item"><div class="kpi-val c-green">57,0%</div><div class="kpi-lbl">SOM PX Visit.</div></div>
+  <div class="kpi-item"><div class="kpi-val c-green">60,7%</div><div class="kpi-lbl">SOM PX CMIs</div></div>
+  <div class="kpi-item"><div class="kpi-val c-amber">437</div><div class="kpi-lbl">NPACs Abril</div></div>
+  <div class="kpi-item"><div class="kpi-val c-amber">54,8%</div><div class="kpi-lbl">Cob. Cota Abr</div></div>
+  <div class="kpi-item"><div class="kpi-val c-green">33/60</div><div class="kpi-lbl">I.C. Realizadas</div></div>
+</div>
+
+<div class="wrapper">
+
+  <!-- TRÍADE -->
+  <section class="section" id="triade">
+    <div class="section-head">
+      <span class="section-badge">Slide 06</span>
+      <div><div class="section-title">Tríade — SOM mercado · SOM PX · Novos pacientes</div><div class="section-sub">Referência Abril 2026 · Comparativo Brasil e Distrito SP2</div></div>
+    </div>
+    <div class="card">
+      <div class="triade-grid">
+        <div class="triade-kpi">
+          <div class="triade-kpi-lbl">SOM Mounjaro (DoT) YTD Jan–Abr</div>
+          <div class="triade-kpi-val c-red">41,9%</div>
+          <div class="triade-lines">
+            <span class="tl" style="background:var(--red-lt);color:var(--red)">Território: 41,9%</span>
+            <span class="tl" style="background:var(--green-lt);color:var(--green)">Distrito SP2: 53,7%</span>
+            <span class="tl" style="background:var(--navy-lt);color:var(--navy)">Brasil: 50,2%</span>
+          </div>
+        </div>
+        <div class="triade-kpi" style="border-right:1px solid var(--border)">
+          <div class="triade-kpi-lbl">SOM PX Mounjaro Abr (visitados)</div>
+          <div class="triade-kpi-val c-green">57,0%</div>
+          <div class="triade-lines">
+            <span class="tl" style="background:var(--green-lt);color:var(--green)">CMIs: 60,7%</span>
+            <span class="tl" style="background:var(--amber-lt);color:var(--amber)">Não visit.: 56,0%</span>
+            <span class="tl" style="background:var(--navy-lt);color:var(--navy)">END SP2: 53,8%</span>
+          </div>
+        </div>
+        <div class="triade-kpi" style="border-right:1px solid var(--border)">
+          <div class="triade-kpi-lbl">NPACs Abril (LMPV)</div>
+          <div class="triade-kpi-val c-amber">437</div>
+          <div class="triade-lines">
+            <span class="tl" style="background:var(--amber-lt);color:var(--amber)">Meta Q2: 1.000/rep/mês</span>
+            <span class="tl" style="background:#F0F0F0;color:#555">Média Distrito: 352/rep</span>
+            <span class="tl" style="background:var(--red-lt);color:var(--red)">Gap: 563/rep</span>
+          </div>
+        </div>
+        <div class="triade-kpi">
+          <div class="triade-kpi-lbl">Cobertura de Cota Abril</div>
+          <div class="triade-kpi-val c-amber">54,8%</div>
+          <div class="triade-lines">
+            <span class="tl" style="background:var(--amber-lt);color:var(--amber)">Território: 54,8%</span>
+            <span class="tl" style="background:#F0F0F0;color:#555">Distrito: 54,9%</span>
+            <span class="tl" style="background:var(--navy-lt);color:var(--navy)">Brasil: 50,5%</span>
+          </div>
+        </div>
+      </div>
+      <div class="subhdr">SOM Mounjaro (DoT) — evolução mensal</div>
+      <table class="triade-tbl">
+        <thead><tr><th>Nível</th><th>Jan</th><th>Fev</th><th>Mar</th><th>Abr</th><th>YTD</th></tr></thead>
+        <tbody>
+          <tr><td>Brasil</td><td>49,3%</td><td>52,0%</td><td>49,8%</td><td>49,7%</td><td>50,2%</td></tr>
+          <tr><td>Distrito SP2</td><td>53,5%</td><td>57,0%</td><td>52,2%</td><td>52,5%</td><td style="color:var(--green);font-weight:700">53,7%</td></tr>
+          <tr class="tr-terr"><td>Território</td><td>44,0%</td><td>51,8%</td><td>40,3%</td><td>35,4%</td><td>41,9%</td></tr>
+        </tbody>
+      </table>
+      <div class="note">Concorrentes: Wegovy SP2 24,4% (+1,3pp vs Mar) · acima Brasil 22,3% · Rybelsus 7,5% · Ozempic 6,8%</div>
+    </div>
+  </section>
+
+  <!-- EXECUÇÃO -->
+  <section class="section" id="execucao">
+    <div class="section-head">
+      <span class="section-badge">Slide 07</span>
+      <div><div class="section-title">SOM PX · Execução de campo · Pacientes ativos</div><div class="section-sub">Médicos visitados por cluster · LMPV · NPACs por apresentação · HITs</div></div>
+    </div>
+    <div class="card">
+      <div class="two-col">
+        <div class="col-left">
+          <div class="subhdr">HCPs por Cluster Mounjaro (visitados)</div>
+          <table class="cl-tbl">
+            <thead><tr><th>Cluster</th><th>CAT 1</th><th>CAT 2</th><th>Total</th></tr></thead>
+            <tbody>
+              <tr><td><span class="cl-badge cb-c">Conquistar ≤40%</span></td><td>4</td><td>6</td><td>10</td></tr>
+              <tr><td><span class="cl-badge cb-a">Acelerar 40–60%</span></td><td>3</td><td>15</td><td>18</td></tr>
+              <tr><td><span class="cl-badge cb-b">Blindar &gt;60%</span></td><td>11</td><td>15</td><td>26</td></tr>
+              <tr class="tot"><td>Total</td><td>18</td><td>36</td><td style="color:var(--green)">54</td></tr>
+              <tr class="som"><td>SOM PX YTD</td><td>59,7%</td><td>55,7%</td><td>57,0%</td></tr>
+            </tbody>
+          </table>
+          <div class="note">Não visitados: END com oportunidade de conquista = prioridade imediata</div>
+          <div class="subhdr">LMPV — Ativação de painel</div>
+          <div class="lmpv-row">
+            <div class="lmpv-cell"><div class="lmpv-lbl">Painel total</div><div class="lmpv-val c-green">90,7%</div><div class="lmpv-sub">Brasil: 77,9%</div></div>
+            <div class="lmpv-cell"><div class="lmpv-lbl">CMIs</div><div class="lmpv-val c-green">100,0%</div><div class="lmpv-sub">Brasil: 96,5%</div></div>
+            <div class="lmpv-cell"><div class="lmpv-lbl">NPACs Abr</div><div class="lmpv-val c-amber">437</div><div class="lmpv-sub">Dist.: 352/rep</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="subhdr">Novos pacientes (NPACs) — por apresentação</div>
+          <table class="npac-tbl">
+            <thead><tr><th>Apresentação</th><th>Jan</th><th>Fev</th><th>Mar</th><th>Abr</th></tr></thead>
+            <tbody>
+              <tr><td>Mounjaro 2,5 mg</td><td>419</td><td>281</td><td>334</td><td>328</td></tr>
+              <tr><td>Mounjaro 5,0 mg</td><td>185</td><td>148</td><td>132</td><td>99</td></tr>
+              <tr><td style="color:var(--green)">Mounjaro 7,5 mg</td><td>29</td><td>14</td><td>25</td><td style="color:var(--red);font-weight:700">7</td></tr>
+              <tr><td style="color:var(--green)">Mounjaro 10,0 mg</td><td>9</td><td>14</td><td>3</td><td style="color:var(--green);font-weight:700">3</td></tr>
+              <tr><td>Mounjaro 12,5 mg</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+              <tr><td>Total</td><td>642</td><td>457</td><td>494</td><td style="color:var(--amber)">437</td></tr>
+            </tbody>
+          </table>
+          <div class="note">Objetivo: crescimento total + intensificação 7,5mg–15mg</div>
+          <div class="subhdr">HITs — Execução até 19/05</div>
+          <div class="hits-row">
+            <div class="hits-cell">
+              <div class="hits-lbl">Interações Científicas</div>
+              <div class="hits-nums"><span class="hits-n c-green">33</span><span class="hits-d">/ 60</span></div>
+              <div class="prog"><div class="prog-fill" style="width:55%;background:var(--green)"></div></div>
+              <div class="hits-pct c-green">55% realizado</div>
+            </div>
+            <div class="hits-cell">
+              <div class="hits-lbl">HITs Qualificados</div>
+              <div class="hits-nums"><span class="hits-n c-amber">48</span><span class="hits-d">/ 120</span></div>
+              <div class="prog"><div class="prog-fill" style="width:40%;background:var(--amber)"></div></div>
+              <div class="hits-pct c-amber">40% realizado</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANO DE AÇÃO -->
+  <section class="section" id="plano">
+    <div class="section-head">
+      <span class="section-badge">Slide 08</span>
+      <div><div class="section-title">Plano de ação Q2 + Julho</div><div class="section-sub">Execuções por HCP prioritário · CAT 1 e CAT 2 · Conquistar e Acelerar</div></div>
+    </div>
+    <div class="card">
+      <div class="plano-grid">
+        <div class="plano-col">
+          <div class="plano-hdr ph-red">CAT 1 — Cluster Conquistar (≤40%)</div>
+          <div class="plano-body pb-red">
+            <div class="hcp"><span class="hcp-n">Ellen Paiva</span><span class="hcp-s"> (END · 30,4%)</span><div class="pills"><span class="pill pr">eP2P SP1 – 26/05</span><span class="pill pr">Lilly em Cena 18/06</span><span class="pill pr">P2P Simone 11/06</span><span class="pill pr">I.C. Berigo</span></div></div>
+            <div class="hcp"><span class="hcp-n">Heloisa Harumi</span><span class="hcp-s"> (END · 39,4%)</span><div class="hcp-obj">Sensível a preço — inicia com Wegovy; influência da Andressa</div><div class="pills"><span class="pill pr">LLE Mai</span><span class="pill pr">eP2P SP1 – 26/05</span><span class="pill pr">P2P Simone 11/06</span><span class="pill pr">UNICAMP</span></div></div>
+            <div class="hcp"><span class="hcp-n">Marcia Forster</span><span class="hcp-s"> (END · CMI · 25,0%)</span><div class="pills"><span class="pill pr">eP2P SP1 – 26/05</span><span class="pill pr">TirzeON Mai</span><span class="pill pr">P2P Simone 11/06</span></div></div>
+            <div class="hcp"><span class="hcp-n">Amintas Cardim</span><span class="hcp-s"> (END · CMI · 32,4%)</span><div class="pills"><span class="pill pr">eP2P SP1 – 26/05</span><span class="pill pr">P2P Simone 11/06</span><span class="pill pr">WCC/CBC</span></div></div>
+          </div>
+        </div>
+        <div class="plano-col">
+          <div class="plano-hdr ph-amber">CAT 1 — Cluster Acelerar (40–60%)</div>
+          <div class="plano-body pb-amber">
+            <div class="hcp"><span class="hcp-n">Ana Lucia Kater</span><span class="hcp-s"> (END · CMI · 60,5%↓)</span><div class="hcp-obj">Queda consistente mês a mês — investigar</div><div class="pills"><span class="pill pa">eP2P SP1 – 26/05</span><span class="pill pa">P2P Simone 11/06</span><span class="pill pa">Lilly em Cena</span></div></div>
+            <div class="hcp"><span class="hcp-n">Evelise Valadão</span><span class="hcp-s"> (END · CMI · 48,1%)</span><div class="hcp-obj">Favorável a cliques — Kwikpen</div><div class="pills"><span class="pill pa">eP2P SP1 – 26/05</span><span class="pill pa">P2P Simone 11/06</span></div></div>
+            <div class="hcp"><span class="hcp-n">Henrique Gurgel</span><span class="hcp-s"> (END · CMI · 56,0%↓)</span><div class="hcp-obj">DM2 não vê benefício custo/MJ</div><div class="pills"><span class="pill pa">MJO One Year</span><span class="pill pa">eP2P SP1 – 26/05</span><span class="pill pa">P2P Simone 11/06</span></div></div>
+            <div class="hcp"><span class="hcp-n">Thais Alves</span><span class="hcp-s"> (END · CMI · 50,0%)</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="plano-grid plano-bot">
+        <div class="plano-col">
+          <div class="plano-hdr ph-red">CAT 2 — Cluster Conquistar (≤40%)</div>
+          <div class="plano-body pb-red">
+            <div class="hcp"><span class="hcp-n">Alice Soares</span><span class="hcp-s"> (CRD · 22,3%)</span><div class="hcp-obj">Preço — Top 1 Rybelsus BR; programa baixa renda</div><div class="pills"><span class="pill pr">I.C. André</span><span class="pill pr">eP2P SP1 – 26/05</span><span class="pill pr">MSL Bruna</span><span class="pill pr">CardioMeta 27/11</span></div></div>
+            <div class="hcp"><span class="hcp-n">Rony Aita</span><span class="hcp-s"> (CRD · 9,1%)</span><div class="pills"><span class="pill pr">I.C. André</span><span class="pill pr">eP2P SP1 – 26/05</span><span class="pill pr">P2P Simone 11/06</span><span class="pill pr">TirzeON Ago</span></div></div>
+            <div class="hcp"><span class="hcp-n">Bruna Nakano</span><span class="hcp-s"> (END · 31,9%)</span><div class="hcp-obj">Crenças não identificadas</div><div class="pills"><span class="pill pr">I.C.</span><span class="pill pr">eP2P SP1 – 26/05</span><span class="pill pr">P2P Simone 11/06</span><span class="pill pr">G7 Summit</span></div></div>
+            <div class="hcp"><span class="hcp-n">Vera Duarte</span><span class="hcp-s"> (END · 37,0%)</span><div class="pills"><span class="pill pr">Podcast do Alex</span><span class="pill pr">eP2P SP1 – 26/05</span><span class="pill pr">P2P Simone 11/06</span></div></div>
+          </div>
+        </div>
+        <div class="plano-col">
+          <div class="plano-hdr ph-amber">CAT 2 — Cluster Acelerar (40–60%) · 15 HCPs</div>
+          <div class="plano-body pb-amber">
+            <div class="hcp"><span class="hcp-n">Laisa Moura</span><span class="hcp-s"> (END · 40,8%)</span><div class="pills"><span class="pill pa">eP2P SP1</span><span class="pill pa">P2P Simone 11/06</span><span class="pill pa">G7 Summit</span><span class="pill pa">UNICAMP</span></div></div>
+            <div class="hcp"><span class="hcp-n">Andreia Latanza</span><span class="hcp-s"> (END · CMI · 61,3%)</span><div class="pills"><span class="pill pa">eP2P SP1</span><span class="pill pa">P2P Simone 11/06</span><span class="pill pa">I.C.</span><span class="pill pa">G7 Summit</span></div></div>
+            <div class="hcp"><span class="hcp-n">Marcia Mazzaro</span><span class="hcp-s"> (END · CMI · 46,5%)</span><div class="pills"><span class="pill pa">eP2P SP1</span><span class="pill pa">P2P Simone 11/06</span></div></div>
+            <div class="hcp"><span class="hcp-n">Hugo Valente</span><span class="hcp-s"> (END · CMI · 50,5%)</span><div class="pills"><span class="pill pa">Preceptoria UNICAMP</span></div></div>
+            <div class="hcp"><span class="hcp-n">Fernanda Rabelo</span><span class="hcp-s"> (END · 46,4%)</span><div class="pills"><span class="pill pa">Podcast do Alex</span></div></div>
+            <div class="hcp-more">+ Jose Carlos (48,2%) · Natalie (44,0%) · Isabel (52,8%) · Juliana (47,5%) · Livia (44,3%) · Jessica (55,4%) · Janaina (56,4%) · Maria Beatriz (57,1%) · Camila (54,2%) · Thais (50,0%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PONTOS DE ATENÇÃO -->
+  <section class="section" id="pontos">
+    <div class="section-head">
+      <span class="section-badge">Slide 09</span>
+      <div><div class="section-title">Pontos de atenção</div><div class="section-sub">Framework tríade — João Pedro Alonso Adolpho</div></div>
+    </div>
+    <div class="ponto pt-r">
+      <div class="ponto-t">SOM DDD abaixo do GPS — caneta multidose e acesso como fatores-chave</div>
+      <ul>
+        <li>SOM DoT (DDD) de 41,9% YTD — mais de 10pp abaixo do Distrito (53,7%) e do Brasil (50,2%); queda para 35,4% em Abril, contrastando com SOM GPS de 57% (visitados) e 60,7% (CMIs)</li>
+        <li>Parcela relevante dos médicos ainda opta pela caneta multidose importada: a prescrição existe, mas a dispensação não é capturada pelo DDD — gerando gap entre intenção prescritiva e demanda registrada no mercado</li>
+        <li>Oportunidade de acesso com a KwikPen: facilidade de uso e possibilidade de titulação mais rápida favorecem adesão e migração para a caneta nacional — argumento clínico e de conveniência a reforçar nos HCPs com perfil de uso da multidose</li>
+      </ul>
+    </div>
+    <div class="ponto pt-a">
+      <div class="ponto-t">Alta concentração de HCPs no cluster Acelerar — quase 30 médicos abaixo do SOM esperado</div>
+      <ul>
+        <li>29 HCPs nos clusters Conquistar + Acelerar (CAT 1 e CAT 2): 10 Conquistar (&lt;40%) e 18 Acelerar (40–60%) — representam o principal volume de oportunidade não capturado</li>
+        <li>CAT 2 Acelerar concentra 15 médicos, muitos ENDs de alto potencial, com objeção recorrente de preço e ausência de planejamento de ação para a maioria</li>
+        <li>Estratégia: priorizar os 8 HCPs CAT 2 com SOM entre 40–55% para escalada rápida — diferencial clínico (SURMOUNT vs STEP) + farmacoeconomia + programas de adesão</li>
+      </ul>
+    </div>
+    <div class="ponto pt-b">
+      <div class="ponto-t">NPACs abaixo da meta, mas acima da média — sinal de potencial com execução a acelerar</div>
+      <ul>
+        <li>437 NPACs em Abril vs. meta de 1.000/rep/mês — gap de 563; porém acima da média do Distrito (352/rep), sinalizando que o território tem base de execução superior</li>
+        <li>NPACs de doses superiores em queda: 7,5mg caiu de 25 (Mar) para 7 (Abr) — alerta para intensificação de dose; 10mg estável (3 em Abr)</li>
+        <li>Alavanca imediata: converter a alta presença qualificada (CMIs 100%, painel 90,7%) em novos inícios — meta exige crescimento de 184% vs. Abril para atingir 1.000/rep/mês</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- RESUMO EXECUTIVO -->
+  <section class="section" id="resumo">
+    <div class="section-head">
+      <span class="section-badge">Slide 10</span>
+      <div><div class="section-title">Resumo executivo — principais conclusões e prioridades</div><div class="section-sub">EPM Vila Mariana · Maio 2026</div></div>
+    </div>
+    <div class="exec-3">
+      <div class="ec ec-g"><div class="ec-t">Ponto forte</div><div class="ec-p">SOM PX de 57% nos visitados e 60,7% em CMIs — acima do Distrito. Ativação de painel 90,7% e CMIs 100%. 18 CAT1 e 36 CAT2 visitados com agenda ativa. Intensificação 10mg em crescimento consistente.</div></div>
+      <div class="ec ec-a"><div class="ec-t">Desafio central</div><div class="ec-p">SOM DoT caiu para 35,4% em Abril — abaixo do Brasil e do Distrito. Gap de 563 NPACs/rep vs. meta Q2. 10 HCPs no cluster Conquistar. Caneta multidose e Wegovy em aceleração amplificam pressão.</div></div>
+      <div class="ec ec-n"><div class="ec-t">Prioridade estratégica</div><div class="ec-p">Plano HCP a HCP para ENDs CAT 1/2 Crítico e Acelerar. Agenda: P2P Simone 11/06, eP2P SP1 26/05, TirzeON, MJO One Year, SOCESP, CBEM, G7 Summit. MSL Bruna para Alice Soares e Rony Aita.</div></div>
+    </div>
+    <div class="top3-hdr">Top 3 prioridades imediatas</div>
+    <div class="top3">
+      <div class="t3i">
+        <div class="t3n n1">1</div>
+        <div><div class="t3t" style="color:var(--red)">Conversão de visitas em NPACs — ENDs CAT 1/2 Cluster Conquistar</div><div class="t3d">Plano HCP a HCP + follow-up semanal: Ellen Paiva, Heloisa Harumi, Marcia Forster, Amintas Cardim (CAT1) · Alice Soares, Rony Aita, Bruna Nakano, Vera Duarte (CAT2)</div></div>
+      </div>
+      <div class="t3i">
+        <div class="t3n n2">2</div>
+        <div><div class="t3t" style="color:var(--navy)">Counter-messaging de preço + argumento KwikPen — zona de disputa Wegovy</div><div class="t3d">Mapear HCPs SOM 40–60% onde Wegovy compete por custo: Claudia Akemi, Evelise Valadão, Laisa Moura, Marcia Mazzaro — farmacoeconomia, SURMOUNT vs STEP e KwikPen como facilitador de titulação</div></div>
+      </div>
+      <div class="t3i">
+        <div class="t3n n3">3</div>
+        <div><div class="t3t" style="color:var(--green)">Execução de eventos com ENDs CAT 1/2 — agenda Mai–Jul</div><div class="t3d">P2P Simone 11/06 · eP2P SP1 26/05 · TirzeON Mai/Ago/Set · MJO One Year Jul · Lilly Em Cena 18/06 · SOCESP · G7 Summit · CBEM — priorizando clusters Conquistar e Acelerar</div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <strong>Lilly</strong>
+  Company Confidential · © 2024 Eli Lilly and Company · EPM Vila Mariana · Q2 2026
+</footer>
+
+<script>
+  const links = document.querySelectorAll('.nav-link');
+  const secs = document.querySelectorAll('.section');
+  window.addEventListener('scroll', () => {
+    let cur = 0;
+    secs.forEach((s,i) => { if(window.scrollY >= s.offsetTop - 70) cur = i; });
+    links.forEach((l,i) => l.classList.toggle('active', i === cur));
+  });
+</script>
+</body>
+</html>
