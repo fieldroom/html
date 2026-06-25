@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Status de Contratação dos Moderadores</title>
+  <style>
+
+    :root {
+      --lilly-red: #E1251B;
+      --lilly-red-dark: #9F1B15;
+      --lilly-red-soft: #FDE8E5;
+      --lilly-red-softer: #FFF4F1;
+      --lilly-red-border: rgba(225, 37, 27, 0.32);
+      --ink: #212121;
+      --ink-2: #343434;
+      --muted: #5F6368;
+      --line: #D7D8E3;
+      --soft-line: #E7E2E0;
+      --white: #FFFFFF;
+      --warm: #FDF2EF;
+      --warm-2: #FFF9F7;
+      --surface: #FFFFFF;
+      --surface-contrast: #212121;
+      --green-soft: #EAF7EF;
+      --green-text: #176B3A;
+      --amber-soft: #FFF4DD;
+      --amber-text: #8A5400;
+      --danger-soft: #FDE8E5;
+      --danger-text: #9F1B15;
+      --blue-soft: #EEF3FF;
+      --blue-text: #254A92;
+      --shadow: 0 18px 46px rgba(70, 24, 20, 0.13);
+      --shadow-strong: 0 18px 42px rgba(33, 33, 33, 0.18);
+      --radius: 22px;
+      --radius-sm: 15px;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Calibri, Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 4% 0%, rgba(225, 37, 27, 0.12), transparent 25rem),
+        radial-gradient(circle at 96% 4%, rgba(33, 33, 33, 0.08), transparent 24rem),
+        var(--warm);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+    input, select, textarea { font-size: 16px; }
+
+    .shell {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(225, 37, 27, 0.15);
+      border-radius: 28px;
+      background: var(--lilly-red);
+      color: var(--white);
+      box-shadow: var(--shadow-strong);
+      padding: 28px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      right: -115px;
+      top: -125px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.16);
+    }
+
+    .eyebrow {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: rgba(0,0,0,0.12);
+      color: var(--white);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      position: relative;
+      z-index: 1;
+      margin: 16px 0 10px;
+      max-width: 800px;
+      font-family: Garamond, Georgia, serif;
+      font-style: italic;
+      font-weight: 800;
+      font-size: clamp(31px, 5vw, 54px);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      max-width: 860px;
+      color: #FBD0CA;
+      font-size: 16px;
+      line-height: 1.62;
+    }
+
+    .hero-actions {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      min-height: 45px;
+      padding: 12px 17px;
+      background: #F0E7E4;
+      color: var(--ink);
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      box-shadow: 0 6px 14px rgba(33,33,33,0.08);
+    }
+
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(33,33,33,.16); }
+    .btn:active { transform: translateY(0); box-shadow: 0 5px 12px rgba(33,33,33,.12); }
+    .btn.primary { background: var(--lilly-red); color: #fff; border: 1px solid var(--lilly-red-dark); }
+    .btn.primary:hover { background: var(--lilly-red-dark); }
+    .hero .btn.primary { background: #fff; color: var(--lilly-red-dark); border: 1px solid rgba(255,255,255,.72); }
+    .hero .btn.primary:hover { background: #FFECE8; }
+    .btn.ghost { background: rgba(255,255,255,.92); border: 1px solid var(--line); color: var(--ink); }
+    .hero .btn.ghost { background: rgba(0,0,0,.14); border: 1px solid rgba(255,255,255,.34); color: #fff; box-shadow: none; }
+    .hero .btn.ghost:hover { background: rgba(0,0,0,.22); }
+    .btn.full { width: 100%; }
+    .btn.small { padding: 9px 12px; font-size: 13px; min-height: 39px; }
+
+    .notice {
+      position: relative;
+      z-index: 1;
+      margin-top: 18px;
+      border: 1px solid rgba(255, 255, 255, .38);
+      border-radius: 16px;
+      background: rgba(0,0,0,.20);
+      color: #fff;
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+    }
+    .notice code { color: #fff; font-weight: 800; }
+    .notice.show { display: block; }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 30px 0 14px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+    }
+
+    .section-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      line-height: 1.48;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .rep-card, .kpi, .doctor-card, .panel, .all-row {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+
+    .rep-card {
+      grid-column: span 4;
+      min-height: 158px;
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+      border-left: 7px solid var(--lilly-red);
+    }
+
+    .rep-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--lilly-red-border);
+      box-shadow: var(--shadow-strong);
+    }
+
+    .rep-card .name {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+    }
+
+    .rep-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 11px;
+      background: var(--lilly-red-soft);
+      color: var(--lilly-red-dark);
+      border: 1px solid var(--lilly-red-border);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.2;
+      max-width: 100%;
+    }
+
+    .pill.ok { background: var(--green-soft); color: var(--green-text); border-color: rgba(23, 107, 58, .22); }
+    .pill.warn { background: var(--amber-soft); color: var(--amber-text); border-color: rgba(138, 84, 0, .24); }
+    .pill.danger { background: var(--danger-soft); color: var(--danger-text); border-color: var(--lilly-red-border); }
+    .pill.gray { background: #F0F1F5; color: var(--ink-2); border-color: var(--line); }
+
+    .kpi {
+      grid-column: span 3;
+      padding: 17px;
+      background: var(--white);
+      border-top: 5px solid var(--lilly-red);
+    }
+
+    .kpi .label {
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .kpi .value {
+      margin-top: 8px;
+      font-size: 34px;
+      font-weight: 950;
+      letter-spacing: -0.055em;
+      color: var(--lilly-red);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin: 18px 0;
+      border: 1px solid var(--line);
+      background: var(--white);
+      border-radius: 20px;
+      padding: 12px;
+      box-shadow: 0 8px 20px rgba(33,33,33,.06);
+    }
+
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .field, .input, .select, .textarea { width: 100%; }
+
+    .input, .select, .textarea {
+      border: 1.4px solid #AEB4C2;
+      border-radius: 14px;
+      background: var(--white);
+      color: var(--ink);
+      padding: 12px 13px;
+      outline: none;
+      transition: border-color .12s ease, box-shadow .12s ease, background .12s ease;
+      box-shadow: inset 0 1px 0 rgba(33,33,33,.03);
+    }
+
+    .input::placeholder, .textarea::placeholder { color: #6B6F76; }
+
+    .input:focus, .select:focus, .textarea:focus {
+      border-color: var(--lilly-red);
+      box-shadow: 0 0 0 4px rgba(225, 37, 27, .13);
+      background: #fff;
+    }
+
+    .toolbar .input, .toolbar .select { min-width: 220px; }
+
+    .doctor-card {
+      grid-column: span 6;
+      overflow: hidden;
+      background: var(--white);
+      border: 1px solid #CBCDD8;
+    }
+
+    .doctor-head {
+      padding: 19px;
+      background: var(--surface-contrast);
+      color: var(--white);
+      border-bottom: 0;
+    }
+
+    .doctor-head-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .doctor-name {
+      font-size: 20px;
+      font-weight: 950;
+      letter-spacing: -0.03em;
+      line-height: 1.18;
+      color: var(--white);
+    }
+
+    .doctor-rep {
+      margin-top: 6px;
+      color: #E5E7EB;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .doctor-head .pill.warn {
+      background: #FFF0D7;
+      color: #7B4A00;
+      border-color: rgba(255,255,255,.35);
+    }
+
+    .doctor-head .pill.ok {
+      background: #DFF4E8;
+      color: #0D5A30;
+      border-color: rgba(255,255,255,.35);
+    }
+
+    .doctor-body {
+      padding: 18px;
+      background: var(--lilly-red-softer);
+      border-top: 1px solid rgba(225,37,27,.18);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-grid .span-2 { grid-column: 1 / -1; }
+
+    .form-grid > div {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 13px;
+      box-shadow: 0 6px 16px rgba(33,33,33,.045);
+    }
+
+    label {
+      display: block;
+      margin: 0 0 8px;
+      color: var(--ink-2);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .textarea {
+      min-height: 105px;
+      resize: vertical;
+      line-height: 1.48;
+    }
+
+    .responded-by {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .chip-radio {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 13px;
+      border-radius: 999px;
+      border: 1.4px solid #AEB4C2;
+      background: #fff;
+      cursor: pointer;
+      color: var(--ink-2);
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 4px 10px rgba(33,33,33,.04);
+    }
+
+    .chip-radio:has(input:checked) {
+      border-color: var(--lilly-red);
+      background: var(--lilly-red-soft);
+      color: var(--lilly-red-dark);
+    }
+
+    .chip-radio input { accent-color: var(--lilly-red); }
+    .other-input { display: none; margin-top: 10px; }
+    .other-input.show { display: block; }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      border-top: 1px solid rgba(225,37,27,.22);
+      margin-top: 16px;
+    }
+
+    .latest-box {
+      margin-top: 14px;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 16px;
+      background: rgba(255,255,255,.10);
+      padding: 12px;
+      color: #F3F4F6;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .latest-box strong { color: #fff; }
+
+    .panel {
+      padding: 18px;
+      margin-top: 16px;
+      background: var(--white);
+      border-left: 7px solid var(--lilly-red);
+    }
+
+    .all-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .all-row {
+      overflow: hidden;
+      background: var(--white);
+    }
+
+    .all-row-main {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr .9fr .9fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+    }
+
+    .all-row .small-title {
+      color: var(--lilly-red-dark);
+      font-size: 11px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+
+    .all-row .value {
+      font-weight: 900;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+
+    .all-row .sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 5px;
+    }
+
+    details {
+      border-top: 1px solid var(--line);
+      background: var(--warm-2);
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 12px 16px;
+      color: var(--lilly-red-dark);
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .history {
+      padding: 0 16px 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .empty {
+      border: 1px dashed #BFAAA4;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.76);
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 50;
+      right: 20px;
+      bottom: 20px;
+      width: min(420px, calc(100% - 40px));
+      border-radius: 18px;
+      background: var(--surface-contrast);
+      color: #fff;
+      padding: 14px 16px;
+      box-shadow: 0 18px 50px rgba(16, 24, 40, .25);
+      transform: translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .loader {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.45);
+      border-top-color: #fff;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 980px) {
+      .rep-card { grid-column: span 6; }
+      .doctor-card { grid-column: span 12; }
+      .kpi { grid-column: span 6; }
+      .all-row-main { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 18px, var(--max)); padding: 9px 0 28px; }
+      .hero { padding: 18px; border-radius: 22px; }
+      .hero::after { width: 190px; height: 190px; right: -92px; top: -86px; }
+      h1 { font-size: clamp(29px, 11vw, 40px); line-height: 1; }
+      .hero p { font-size: 14px; line-height: 1.5; }
+      .hero-actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .hero-actions .btn { width: 100%; }
+      .section-head { display: block; margin: 22px 0 12px; }
+      .section-head h2 { font-size: 21px; }
+      .section-head p { font-size: 14px; }
+      .section-head .btn { margin-top: 12px; width: 100%; }
+      .grid { gap: 12px; }
+      .rep-card, .kpi { grid-column: span 12; }
+      .rep-card { min-height: 128px; padding: 17px; }
+      .rep-card .name { font-size: 19px; }
+      .rep-meta { align-items: flex-start; }
+      .kpi { padding: 15px; }
+      .kpi .value { font-size: 30px; }
+      .panel { padding: 15px; border-radius: 18px; }
+      .doctor-card { border-radius: 20px; }
+      .doctor-head, .doctor-body { padding: 15px; }
+      .doctor-head-top { display: grid; grid-template-columns: 1fr; gap: 10px; }
+      .doctor-head-top .pill { justify-self: start; }
+      .doctor-name { font-size: 20px; }
+      .form-grid { grid-template-columns: 1fr; gap: 12px; }
+      .form-grid .span-2 { grid-column: auto; }
+      .form-grid > div { padding: 12px; border-radius: 15px; }
+      .textarea { min-height: 112px; }
+      .toolbar { align-items: stretch; border-radius: 18px; }
+      .toolbar-left, .toolbar-right { width: 100%; }
+      .toolbar .input, .toolbar .select, .toolbar .btn { width: 100%; min-width: 0; }
+      .all-row-main { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
+      .card-actions { align-items: stretch; }
+      .card-actions .pill { justify-content: center; width: 100%; }
+      .card-actions .btn { width: 100%; }
+      .responded-by { display: grid; grid-template-columns: 1fr; }
+      .chip-radio { justify-content: flex-start; width: 100%; min-height: 46px; }
+      .toast { right: 10px; bottom: 10px; width: calc(100% - 20px); border-radius: 16px; }
+    }
+
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <span class="eyebrow">Painel de acompanhamento</span>
+      <h1>Status de Contratação dos Moderadores</h1>
+      <div class="hero-actions">
+        <button class="btn primary" type="button" onclick="showHome()">Início</button>
+        <button class="btn ghost" type="button" onclick="showAll()">Todos</button>
+        <button class="btn ghost" type="button" onclick="loadUpdates(true)">Atualizar dados</button>
+      </div>
+      <div id="backendNotice" class="notice"></div>
+    </header>
+
+    <section id="app"></section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    /**********************************************************************
+     * CONFIGURAÇÃO OBRIGATÓRIA PARA USO EM GITHUB PAGES
+     * 1) Publique o Google Apps Script entregue junto com este HTML.
+     * 2) Cole abaixo a URL do Web App publicado.
+     * 3) Enquanto estiver vazio, este HTML funciona apenas em modo local.
+     **********************************************************************/
+    const CONFIG = {
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbzYCJnrseOYnWkUZeswaUTPXsg-ilW-lBcPRxCj-m7D3NERMPfqS0IIM5FYhqtcb6yi/exec" // Exemplo: "https://script.google.com/macros/s/AKfycb.../exec"
+    };
+
+    // Nova chave de armazenamento local para iniciar esta versão sem submissões anteriores.
+    const LOCAL_STORAGE_KEY = "moderatorStatusRecords_reset_2026_06_25";
+
+    const DOCTORS = [
+      { id: "giovanna-carolina-de-mel", doctor: "Giovanna Carolina de Mel", representative: "Edison Leandro" },
+      { id: "priscilla-oiring-buch", doctor: "Priscilla Oiring Buch", representative: "Edison Leandro" },
+      { id: "camille-mota-ribeiro", doctor: "Camille Mota Ribeiro", representative: "João Pedro Adolpho" },
+      { id: "denise-helena-pomme", doctor: "Denise Helena Pomme", representative: "Danielle Chedid" },
+      { id: "fabio-augusto-de-luca", doctor: "Fabio Augusto de Luca", representative: "Roberta Santos" },
+      { id: "frederico-bellucci-fine", doctor: "Frederico Bellucci Fine", representative: "Vinicius Abreu" },
+      { id: "priscila-dimovci", doctor: "Priscila Dimovci", representative: "Danielle Chedid" },
+      { id: "tatiana-valente", doctor: "Tatiana Valente", representative: "Vinicius Abreu" },
+      { id: "vanessa-araujo-montana", doctor: "Vanessa Araujo Montana", representative: "Nicole Dalan" },
+      { id: "eduardo-costa-rauen", doctor: "Eduardo Costa Rauen", representative: "Roberta Santos" }
+    ];
+
+    const STATUS_OPTIONS = [
+      "Aguardando atualização de serviços da PJ",
+      "Aguardando envio de documentação atualizada da PJ",
+      "Aguardando envio de dados bancários",
+      "Outro"
+    ];
+
+    const app = document.getElementById("app");
+    const backendNotice = document.getElementById("backendNotice");
+    const toast = document.getElementById("toast");
+
+    let records = [];
+    let latestByDoctor = {};
+    let activeView = "home";
+    let activeRep = null;
+    let isLoading = false;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateBackendNotice();
+      loadUpdates(false).then(showHome);
+    });
+
+    function isBackendConfigured() {
+      return CONFIG.WEB_APP_URL && CONFIG.WEB_APP_URL.trim().startsWith("https://script.google.com/");
+    }
+
+    function updateBackendNotice() {
+      backendNotice.classList.remove("show");
+      backendNotice.innerHTML = "";
+    }
+
+    async function loadUpdates(showMessage = false) {
+      if (isLoading) return;
+      isLoading = true;
+      try {
+        if (isBackendConfigured()) {
+          const response = await jsonp(`${CONFIG.WEB_APP_URL}?action=list`);
+          records = Array.isArray(response.records) ? response.records : [];
+        } else {
+          records = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || "[]");
+        }
+        normalizeRecords();
+        if (showMessage) showToast("Dados atualizados.");
+        rerender();
+      } catch (error) {
+        console.error(error);
+        showToast("Não foi possível atualizar os dados. Confira a URL do Web App ou tente novamente.");
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    function normalizeRecords() {
+      records = records
+        .filter(Boolean)
+        .map((record, index) => ({
+          id: record.id || record.updateId || `local-${index}`,
+          doctorId: record.doctorId,
+          doctorName: record.doctorName,
+          representative: record.representative,
+          status: record.status || "",
+          pendingReason: record.pendingReason || "",
+          nextAction: record.nextAction || "",
+          targetDate: record.targetDate || "",
+          notes: record.notes || "",
+          answeredBy: record.answeredBy || record.respondedBy || "",
+          clientTimestamp: record.clientTimestamp || "",
+          serverTimestamp: record.serverTimestamp || record.timestamp || ""
+        }))
+        .sort((a, b) => getRecordTime(b) - getRecordTime(a));
+
+      latestByDoctor = {};
+      records.forEach(record => {
+        if (!record.doctorId) return;
+        if (!latestByDoctor[record.doctorId]) latestByDoctor[record.doctorId] = record;
+      });
+    }
+
+    function getRecordTime(record) {
+      return new Date(record.serverTimestamp || record.clientTimestamp || 0).getTime() || 0;
+    }
+
+    function rerender() {
+      if (activeView === "all") showAll(false);
+      else if (activeView === "rep" && activeRep) showRep(activeRep, false);
+      else showHome(false);
+    }
+
+    function showHome(updateState = true) {
+      if (updateState) {
+        activeView = "home";
+        activeRep = null;
+      }
+
+      const reps = getRepresentatives();
+      const updated = DOCTORS.filter(d => latestByDoctor[d.id]).length;
+      const pending = DOCTORS.length - updated;
+
+      app.innerHTML = `
+        <div class="section-head">
+          <div>
+            <h2>Escolha a área do representante</h2>
+            <p>Cada botão abre apenas os moderadores pendentes vinculados ao representante selecionado.</p>
+          </div>
+          <button class="btn primary" type="button" onclick="showAll()">Ver visão Todos</button>
+        </div>
+
+        <div class="grid">
+          ${kpiHtml("Moderadores pendentes", DOCTORS.length)}
+          ${kpiHtml("Com status atualizado", updated)}
+          ${kpiHtml("Ainda sem atualização", pending)}
+          ${kpiHtml("Representantes", reps.length)}
+        </div>
+
+        <div class="section-head">
+          <div>
+            <h2>Representantes</h2>
+            <p>Cards ordenados por volume de moderadores pendentes.</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          ${reps.map(rep => repCardHtml(rep)).join("")}
+        </div>
+      `;
+    }
+
+    function showAll(updateState = true) {
+      if (updateState) {
+        activeView = "all";
+        activeRep = null;
+      }
+
+      const updated = DOCTORS.filter(d => latestByDoctor[d.id]).length;
+      const pending = DOCTORS.length - updated;
+      const rate = DOCTORS.length ? Math.round((updated / DOCTORS.length) * 100) : 0;
+      const reps = getRepresentatives().map(r => r.name);
+
+      app.innerHTML = `
+        <div class="section-head">
+          <div>
+            <h2>Visão geral · Todos</h2>
+            <p>Consolidado com status de cada moderador, responsável, última atualização e histórico de respostas.</p>
+          </div>
+          <button class="btn ghost" type="button" onclick="showHome()">Voltar ao início</button>
+        </div>
+
+        <div class="grid">
+          ${kpiHtml("Total em contratação", DOCTORS.length)}
+          ${kpiHtml("Atualizados", updated)}
+          ${kpiHtml("Pendentes", pending)}
+          ${kpiHtml("Cobertura", rate + "%")}
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input id="searchInput" class="input" type="search" placeholder="Buscar médico ou representante" oninput="renderAllRows()" />
+            <select id="repFilter" class="select" onchange="renderAllRows()">
+              <option value="">Todos os representantes</option>
+              ${reps.map(rep => `<option value="${escapeAttr(rep)}">${escapeHtml(rep)}</option>`).join("")}
+            </select>
+            <select id="statusFilter" class="select" onchange="renderAllRows()">
+              <option value="">Todos os status</option>
+              <option value="__pending">Pendente de atualização</option>
+              <option value="__updated">Com atualização</option>
+              ${STATUS_OPTIONS.map(status => `<option value="${escapeAttr(status)}">${escapeHtml(status)}</option>`).join("")}
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn ghost small" type="button" onclick="loadUpdates(true)">Atualizar</button>
+          </div>
+        </div>
+
+        <div id="allRows" class="all-list"></div>
+      `;
+
+      renderAllRows();
+    }
+
+    function renderAllRows() {
+      const container = document.getElementById("allRows");
+      if (!container) return;
+
+      const search = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+      const repFilter = document.getElementById("repFilter")?.value || "";
+      const statusFilter = document.getElementById("statusFilter")?.value || "";
+
+      const filtered = DOCTORS.filter(doctor => {
+        const latest = latestByDoctor[doctor.id];
+        const haystack = `${doctor.doctor} ${doctor.representative} ${latest?.status || ""}`.toLowerCase();
+        const searchOk = !search || haystack.includes(search);
+        const repOk = !repFilter || doctor.representative === repFilter;
+        let statusOk = true;
+        if (statusFilter === "__pending") statusOk = !latest;
+        else if (statusFilter === "__updated") statusOk = !!latest;
+        else if (statusFilter) statusOk = latest?.status === statusFilter;
+        return searchOk && repOk && statusOk;
+      });
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="empty">Nenhum moderador encontrado com os filtros aplicados.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(allRowHtml).join("");
+    }
+
+    function showRep(repName, updateState = true) {
+      if (updateState) {
+        activeView = "rep";
+        activeRep = repName;
+      }
+
+      const doctors = DOCTORS.filter(d => d.representative === repName);
+      const updated = doctors.filter(d => latestByDoctor[d.id]).length;
+      const pending = doctors.length - updated;
+
+      app.innerHTML = `
+        <div class="section-head">
+          <div>
+            <h2>Área · ${escapeHtml(repName)}</h2>
+            <p>${doctors.length} moderador(es) ainda pendente(s) de contratação. Atualize individualmente ou submeta todos os cartões preenchidos.</p>
+          </div>
+          <button class="btn ghost" type="button" onclick="showHome()">Voltar ao início</button>
+        </div>
+
+        <div class="grid">
+          ${kpiHtml("Moderadores da área", doctors.length)}
+          ${kpiHtml("Atualizados", updated)}
+          ${kpiHtml("Ainda pendentes", pending)}
+          ${kpiHtml("Histórico total", records.filter(r => doctors.some(d => d.id === r.doctorId)).length)}
+        </div>
+
+        <div class="panel">
+          <div class="section-head" style="margin: 0;">
+            <div>
+              <h2 style="font-size: 20px;">Atualizações</h2>
+              <p>Preencha os campos dos médicos necessários e clique em “Submeter Status Atualizado”.</p>
+            </div>
+            <button class="btn primary" type="button" onclick="submitAllForRep('${escapeAttr(repName)}')">Submeter todos preenchidos</button>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top: 16px;">
+          ${doctors.map(doctorCardHtml).join("")}
+        </div>
+      `;
+
+      doctors.forEach(d => bindDoctorCard(d.id));
+    }
+
+    function getRepresentatives() {
+      const map = new Map();
+      DOCTORS.forEach(doctor => {
+        if (!map.has(doctor.representative)) {
+          map.set(doctor.representative, { name: doctor.representative, total: 0, updated: 0 });
+        }
+        const item = map.get(doctor.representative);
+        item.total += 1;
+        if (latestByDoctor[doctor.id]) item.updated += 1;
+      });
+      return Array.from(map.values()).sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, "pt-BR"));
+    }
+
+    function kpiHtml(label, value) {
+      return `
+        <div class="kpi">
+          <div class="label">${escapeHtml(label)}</div>
+          <div class="value">${escapeHtml(String(value))}</div>
+        </div>
+      `;
+    }
+
+    function repCardHtml(rep) {
+      const pending = rep.total - rep.updated;
+      const badgeClass = pending ? "warn" : "ok";
+      const badgeText = pending ? `${pending} sem atualização` : "Tudo atualizado";
+      return `
+        <article class="rep-card" onclick="showRep('${escapeAttr(rep.name)}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter') showRep('${escapeAttr(rep.name)}')">
+          <div>
+            <div class="name">${escapeHtml(rep.name)}</div>
+            <div class="rep-meta">
+              <span>${rep.total} moderador(es)</span>
+              <span class="pill ${badgeClass}">${badgeText}</span>
+            </div>
+          </div>
+          <div class="rep-meta">
+            <span>${rep.updated} atualizado(s)</span>
+            <span>Abrir área →</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function doctorCardHtml(doctor) {
+      const latest = latestByDoctor[doctor.id];
+      const latestHtml = latest ? `
+        <div class="latest-box">
+          <strong>Última atualização:</strong> ${escapeHtml(formatDateTime(latest.serverTimestamp || latest.clientTimestamp))}<br>
+          <strong>Status:</strong> ${escapeHtml(latest.status || "Não informado")}<br>
+          <strong>Respondido por:</strong> ${escapeHtml(latest.answeredBy || "Não informado")}
+        </div>
+      ` : `
+        <div class="latest-box">
+          <strong>Status atual:</strong> pendente de atualização.
+        </div>
+      `;
+
+      return `
+        <article class="doctor-card" data-doctor-id="${escapeAttr(doctor.id)}">
+          <div class="doctor-head">
+            <div class="doctor-head-top">
+              <div>
+                <div class="doctor-name">${escapeHtml(doctor.doctor)}</div>
+                <div class="doctor-rep">Representante: ${escapeHtml(doctor.representative)}</div>
+              </div>
+              <span class="pill ${latest ? 'ok' : 'warn'}">${latest ? 'Atualizado' : 'Pendente'}</span>
+            </div>
+            ${latestHtml}
+          </div>
+          <div class="doctor-body">
+            <div class="form-grid">
+              <div class="span-2">
+                <label for="status-${escapeAttr(doctor.id)}">Status atual</label>
+                <select class="select js-status" id="status-${escapeAttr(doctor.id)}">
+                  <option value="">Selecione uma opção</option>
+                  ${STATUS_OPTIONS.map(status => `<option value="${escapeAttr(status)}">${escapeHtml(status)}</option>`).join("")}
+                </select>
+              </div>
+
+              <div class="span-2">
+                <label for="reason-${escapeAttr(doctor.id)}">Motivo da pendência</label>
+                <textarea class="textarea js-reason" id="reason-${escapeAttr(doctor.id)}" placeholder="Descreva, de forma objetiva, por que a contratação ainda não foi concluída."></textarea>
+              </div>
+
+              <div class="span-2">
+                <label for="next-${escapeAttr(doctor.id)}">Encaminhamento planejado</label>
+                <textarea class="textarea js-next" id="next-${escapeAttr(doctor.id)}" placeholder="Informe a ação que será tomada, quem será acionado e o que precisa acontecer para destravar o processo."></textarea>
+              </div>
+
+              <div>
+                <label for="date-${escapeAttr(doctor.id)}">Previsão de resolução</label>
+                <input class="input js-date" id="date-${escapeAttr(doctor.id)}" type="date" />
+              </div>
+
+              <div>
+                <label>Respondido por</label>
+                <div class="responded-by">
+                  <label class="chip-radio"><input type="radio" name="by-${escapeAttr(doctor.id)}" value="rep" checked /> ${escapeHtml(doctor.representative)}</label>
+                  <label class="chip-radio"><input type="radio" name="by-${escapeAttr(doctor.id)}" value="other" /> Outro</label>
+                </div>
+                <input class="input other-input js-other" type="text" placeholder="Escreva o nome de quem respondeu" />
+              </div>
+
+              <div class="span-2">
+                <label for="notes-${escapeAttr(doctor.id)}">Observações adicionais</label>
+                <textarea class="textarea js-notes" id="notes-${escapeAttr(doctor.id)}" placeholder="Inclua qualquer contexto adicional relevante. Campo opcional."></textarea>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <span class="pill gray">Histórico: ${records.filter(r => r.doctorId === doctor.id).length} atualização(ões)</span>
+              <button class="btn primary" type="button" onclick="submitDoctor('${escapeAttr(doctor.id)}')">Submeter Status Atualizado</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function bindDoctorCard(doctorId) {
+      const card = document.querySelector(`[data-doctor-id="${cssEscape(doctorId)}"]`);
+      if (!card) return;
+      const otherInput = card.querySelector(".js-other");
+      card.querySelectorAll(`input[name="by-${doctorId}"]`).forEach(radio => {
+        radio.addEventListener("change", () => {
+          otherInput.classList.toggle("show", radio.value === "other" && radio.checked);
+        });
+      });
+    }
+
+    function allRowHtml(doctor) {
+      const latest = latestByDoctor[doctor.id];
+      const history = records.filter(r => r.doctorId === doctor.id);
+
+      if (!latest) {
+        return `
+          <article class="all-row">
+            <div class="all-row-main">
+              <div>
+                <div class="small-title">Moderador</div>
+                <div class="value">${escapeHtml(doctor.doctor)}</div>
+              </div>
+              <div>
+                <div class="small-title">Representante</div>
+                <div class="value">${escapeHtml(doctor.representative)}</div>
+              </div>
+              <div>
+                <div class="small-title">Status</div>
+                <span class="pill warn">Pendente de atualização</span>
+              </div>
+              <div>
+                <div class="small-title">Última atualização</div>
+                <div class="sub">Ainda não respondido</div>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      return `
+        <article class="all-row">
+          <div class="all-row-main">
+            <div>
+              <div class="small-title">Moderador</div>
+              <div class="value">${escapeHtml(doctor.doctor)}</div>
+              <div class="sub">Respondido por: ${escapeHtml(latest.answeredBy || "Não informado")}</div>
+            </div>
+            <div>
+              <div class="small-title">Representante</div>
+              <div class="value">${escapeHtml(doctor.representative)}</div>
+            </div>
+            <div>
+              <div class="small-title">Status</div>
+              <span class="pill ok">${escapeHtml(latest.status || "Atualizado")}</span>
+              ${latest.targetDate ? `<div class="sub">Previsão: ${escapeHtml(formatDate(latest.targetDate))}</div>` : ""}
+            </div>
+            <div>
+              <div class="small-title">Última atualização</div>
+              <div class="value">${escapeHtml(formatDateTime(latest.serverTimestamp || latest.clientTimestamp))}</div>
+            </div>
+          </div>
+          <div style="padding: 0 16px 16px;">
+            ${latest.pendingReason ? `<div class="sub"><strong>Motivo:</strong> ${escapeHtml(latest.pendingReason)}</div>` : ""}
+            ${latest.nextAction ? `<div class="sub"><strong>Encaminhamento:</strong> ${escapeHtml(latest.nextAction)}</div>` : ""}
+            ${latest.notes ? `<div class="sub"><strong>Observações:</strong> ${escapeHtml(latest.notes)}</div>` : ""}
+          </div>
+          <details>
+            <summary>Ver histórico completo (${history.length})</summary>
+            <div class="history">
+              ${history.map(historyItemHtml).join("")}
+            </div>
+          </details>
+        </article>
+      `;
+    }
+
+    function historyItemHtml(record) {
+      return `
+        <div class="history-item">
+          <strong>${escapeHtml(formatDateTime(record.serverTimestamp || record.clientTimestamp))}</strong><br>
+          <strong>Status:</strong> ${escapeHtml(record.status || "Não informado")}<br>
+          <strong>Respondido por:</strong> ${escapeHtml(record.answeredBy || "Não informado")}<br>
+          ${record.targetDate ? `<strong>Previsão:</strong> ${escapeHtml(formatDate(record.targetDate))}<br>` : ""}
+          ${record.pendingReason ? `<strong>Motivo:</strong> ${escapeHtml(record.pendingReason)}<br>` : ""}
+          ${record.nextAction ? `<strong>Encaminhamento:</strong> ${escapeHtml(record.nextAction)}<br>` : ""}
+          ${record.notes ? `<strong>Observações:</strong> ${escapeHtml(record.notes)}` : ""}
+        </div>
+      `;
+    }
+
+    async function submitDoctor(doctorId) {
+      const doctor = DOCTORS.find(d => d.id === doctorId);
+      const card = document.querySelector(`[data-doctor-id="${cssEscape(doctorId)}"]`);
+      if (!doctor || !card) return false;
+
+      const payload = getPayloadFromCard(doctor, card);
+      if (!payload) return false;
+
+      await savePayload(payload);
+      showToast(`Status de ${doctor.doctor} submetido com sucesso.`);
+      clearCard(card);
+      await sleep(isBackendConfigured() ? 950 : 0);
+      await loadUpdates(false);
+      return true;
+    }
+
+    async function submitAllForRep(repName) {
+      const doctors = DOCTORS.filter(d => d.representative === repName);
+      const payloads = [];
+
+      doctors.forEach(doctor => {
+        const card = document.querySelector(`[data-doctor-id="${cssEscape(doctor.id)}"]`);
+        if (!card) return;
+        if (!cardHasAnyInput(card)) return;
+        const payload = getPayloadFromCard(doctor, card, true);
+        if (payload) payloads.push({ payload, card });
+      });
+
+      if (!payloads.length) {
+        showToast("Nenhum cartão preenchido para submeter. Preencha pelo menos um campo de atualização.");
+        return;
+      }
+
+      for (const item of payloads) {
+        await savePayload(item.payload);
+        clearCard(item.card);
+      }
+
+      showToast(`${payloads.length} atualização(ões) submetida(s) com sucesso.`);
+      await sleep(isBackendConfigured() ? 1100 : 0);
+      await loadUpdates(false);
+    }
+
+    function getPayloadFromCard(doctor, card, silent = false) {
+      const status = card.querySelector(".js-status")?.value.trim() || "";
+      const pendingReason = card.querySelector(".js-reason")?.value.trim() || "";
+      const nextAction = card.querySelector(".js-next")?.value.trim() || "";
+      const targetDate = card.querySelector(".js-date")?.value || "";
+      const notes = card.querySelector(".js-notes")?.value.trim() || "";
+      const byChoice = card.querySelector(`input[name="by-${doctor.id}"]:checked`)?.value || "rep";
+      const otherName = card.querySelector(".js-other")?.value.trim() || "";
+      const answeredBy = byChoice === "other" ? otherName : doctor.representative;
+
+      if (!status) {
+        if (!silent) showToast("Selecione o status atual antes de submeter.");
+        return null;
+      }
+      if (byChoice === "other" && !otherName) {
+        if (!silent) showToast("Informe o nome de quem respondeu no campo ‘Outro’.");
+        return null;
+      }
+
+      return {
+        doctorId: doctor.id,
+        doctorName: doctor.doctor,
+        representative: doctor.representative,
+        status,
+        pendingReason,
+        nextAction,
+        targetDate,
+        notes,
+        answeredBy,
+        clientTimestamp: new Date().toISOString(),
+        sourcePage: location.href
+      };
+    }
+
+    function cardHasAnyInput(card) {
+      const values = [
+        card.querySelector(".js-status")?.value,
+        card.querySelector(".js-reason")?.value,
+        card.querySelector(".js-next")?.value,
+        card.querySelector(".js-date")?.value,
+        card.querySelector(".js-notes")?.value,
+        card.querySelector(".js-other")?.value
+      ];
+      return values.some(value => String(value || "").trim());
+    }
+
+    async function savePayload(payload) {
+      if (isBackendConfigured()) {
+        const body = new URLSearchParams();
+        body.append("payload", JSON.stringify(payload));
+        await fetch(CONFIG.WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          body
+        });
+      } else {
+        const localRecords = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || "[]");
+        localRecords.push({
+          id: crypto?.randomUUID ? crypto.randomUUID() : `local-${Date.now()}-${Math.random()}`,
+          ...payload,
+          serverTimestamp: payload.clientTimestamp
+        });
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localRecords));
+      }
+    }
+
+    function clearCard(card) {
+      card.querySelector(".js-status").value = "";
+      card.querySelector(".js-reason").value = "";
+      card.querySelector(".js-next").value = "";
+      card.querySelector(".js-date").value = "";
+      card.querySelector(".js-notes").value = "";
+      card.querySelector(".js-other").value = "";
+      card.querySelector(".js-other").classList.remove("show");
+      const repRadio = card.querySelector("input[value='rep']");
+      if (repRadio) repRadio.checked = true;
+    }
+
+    function jsonp(url) {
+      return new Promise((resolve, reject) => {
+        const callbackName = `jsonp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const separator = url.includes("?") ? "&" : "?";
+        const script = document.createElement("script");
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error("Timeout ao carregar dados."));
+        }, 12000);
+
+        function cleanup() {
+          clearTimeout(timeout);
+          script.remove();
+          delete window[callbackName];
+        }
+
+        window[callbackName] = data => {
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("Erro ao carregar JSONP."));
+        };
+
+        script.src = `${url}${separator}callback=${callbackName}&_=${Date.now()}`;
+        document.body.appendChild(script);
+      });
+    }
+
+    function showToast(message) {
+      toast.innerHTML = escapeHtml(message);
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 3600);
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "Não informado";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(date);
+    }
+
+    function formatDate(value) {
+      if (!value) return "Não informado";
+      const [year, month, day] = value.split("-");
+      if (!year || !month || !day) return value;
+      return `${day}/${month}/${year}`;
+    }
+
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeAttr(value) { return escapeHtml(value); }
+
+    function cssEscape(value) {
+      if (window.CSS && CSS.escape) return CSS.escape(value);
+      return String(value).replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+    }
+  </script>
+</body>
+</html>
