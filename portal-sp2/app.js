@@ -1,6 +1,6 @@
 const CONFIG = {
   WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwdYPJRIQytV1mZ7IxkHgWrxm3DrZQXODdBmkBYaYASKlVReYijAMpgOYhZ4pHt9JTYPA/exec",
-  APP_VERSION: "1.0.16",
+  APP_VERSION: "1.0.17",
   DEMO_STORAGE_KEY: "portal-sp2-items-v1",
   DEMO_HISTORY_KEY: "portal-sp2-history-v1",
   CLOUD_CACHE_KEY: "portal-sp2-cloud-cache-v1",
@@ -697,7 +697,7 @@ function renderItemCard(item, options = {}) {
   const title = getItemDisplayTitle(item);
   const dateText = options.showDateInMeta ? formatDayMonth(item.occurrenceDate || item.date) : "";
   const metaParts = [
-    priority ? `<span class="priority-mini">${escapeHtml(priority)}</span>` : "",
+    priority ? `<span class="priority-mini ${priorityToneClass(item.priority)}">${escapeHtml(priority)}</span>` : "",
     `<span class="responsible-mini">${escapeHtml(responsibility)}</span>`,
     dateText ? `<span class="date-mini">${escapeHtml(dateText)}</span>` : "",
     `<span class="time-mini">${escapeHtml(timeText || "Sem horário")}</span>`,
@@ -1985,6 +1985,13 @@ function priorityClass(priority) {
   return "";
 }
 
+function priorityToneClass(priority) {
+  if (priority === "Alta") return "is-high";
+  if (priority === "Média") return "is-medium";
+  if (priority === "Baixa") return "is-low";
+  return "";
+}
+
 function formatResponsible(item) {
   return item.responsibilityMode === "Individual" ? item.responsibleName || "Individual" : "Todos";
 }
@@ -2000,7 +2007,7 @@ function responsibleFilterLabel(value) {
 }
 
 function formatPriorityInline(priority) {
-  return priority && priority !== "Não aplicável" ? `Prior. ${priority}` : "";
+  return priority && priority !== "Não aplicável" ? priority : "";
 }
 
 function getItemDisplayTitle(item) {

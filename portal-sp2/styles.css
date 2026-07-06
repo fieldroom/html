@@ -750,6 +750,18 @@ select:disabled {
   font-weight: 750;
 }
 
+.priority-mini.is-high {
+  color: #b42318;
+}
+
+.priority-mini.is-medium {
+  color: #b76b00;
+}
+
+.priority-mini.is-low {
+  color: #16803d;
+}
+
 .responsible-mini {
   color: #8b96a8;
   font-weight: 400;
