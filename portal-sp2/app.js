@@ -1,6 +1,6 @@
 const CONFIG = {
   WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwdYPJRIQytV1mZ7IxkHgWrxm3DrZQXODdBmkBYaYASKlVReYijAMpgOYhZ4pHt9JTYPA/exec",
-  APP_VERSION: "1.0.15",
+  APP_VERSION: "1.0.16",
   DEMO_STORAGE_KEY: "portal-sp2-items-v1",
   DEMO_HISTORY_KEY: "portal-sp2-history-v1",
   CLOUD_CACHE_KEY: "portal-sp2-cloud-cache-v1",
@@ -468,18 +468,17 @@ function renderTodayView() {
   const today = toISODate(new Date());
   const todayItems = applyFiltersAndSort(buildOccurrences(today, today));
   const nextItems = applyFiltersAndSort(buildOccurrences(addDaysISO(today, 1), addDaysISO(today, 7)));
-  const pending = getPendingOccurrences();
+  const previous = getPreviousOccurrences();
 
   return `
     <section class="section" aria-label="Resumo de hoje">
       <div class="quick-metrics">
         ${metricCard(todayItems.length, "Itens de hoje")}
         ${metricCard(nextItems.length, "Próximos 7 dias")}
-        ${metricCard(pending.length, "Em aberto/Vencido")}
-        ${metricCard(pending.filter((item) => item.isOverdue).length, "Vencidos")}
+        ${metricCard(previous.length, getPreviousSectionLabel())}
       </div>
     </section>
-    ${renderPendingSection(pending)}
+    ${renderPreviousSection(previous)}
     ${renderCollapsibleSection("today-items", "Hoje", "", todayItems, {
       bodyClass: "agenda-list nested-day-list",
       contentHtml: renderGroupedDayList(todayItems, today, today, { onlyWithItems: true }),
@@ -498,7 +497,7 @@ function renderMonthView() {
   const occurrences = applyFiltersAndSort(buildOccurrences(range.start, range.end));
   const monthOccurrences = applyFiltersAndSort(buildOccurrences(monthStart, monthEnd));
   const byDate = groupByDate(occurrences);
-  const pending = getPendingOccurrences();
+  const previous = getPreviousOccurrences();
   const cells = [];
 
   for (let cursor = parseISODate(range.start); cursor <= parseISODate(range.end); cursor = addDays(cursor, 1)) {
@@ -523,7 +522,7 @@ function renderMonthView() {
   }
 
   return `
-    ${renderPendingSection(pending)}
+    ${renderPreviousSection(previous)}
     <section class="section" aria-label="Calendário mensal">
       ${renderSectionTitle("Mês", formatMonthYear(state.currentDate))}
       <div class="month-grid">
@@ -540,10 +539,10 @@ function renderMonthView() {
 function renderWeekView() {
   const range = getWeekRange(state.currentDate);
   const occurrences = applyFiltersAndSort(buildOccurrences(range.start, range.end));
-  const pending = getPendingOccurrences();
+  const previous = getPreviousOccurrences();
 
   return `
-    ${renderPendingSection(pending)}
+    ${renderPreviousSection(previous)}
     <section class="section" aria-label="Semana">
       ${renderSectionTitle("Semana", formatWeekRange(range))}
       <div class="agenda-list week-agenda-list">
@@ -555,22 +554,22 @@ function renderWeekView() {
 
 function renderDayView() {
   const occurrences = applyFiltersAndSort(buildOccurrences(state.currentDate, state.currentDate));
-  const pending = getPendingOccurrences();
+  const previous = getPreviousOccurrences();
   return `
-    ${renderPendingSection(pending)}
+    ${renderPreviousSection(previous)}
     ${renderSection("Dia", formatLongDate(state.currentDate), occurrences)}
   `;
 }
 
 function renderAgendaView() {
   const today = toISODate(new Date());
-  const start = state.currentDate < today ? state.currentDate : today;
+  const start = state.currentDate > today ? state.currentDate : today;
   const end = addDaysISO(start, 90);
   const occurrences = applyFiltersAndSort(buildOccurrences(start, end));
-  const pending = getPendingOccurrences();
+  const previous = getPreviousOccurrences();
 
   return `
-    ${renderPendingSection(pending)}
+    ${renderPreviousSection(previous)}
     <section class="section" aria-label="Programação">
       ${renderSectionTitle("Programação", "Agrupada por dia", `<button class="secondary-button" type="button" data-action="export-agenda"><i data-lucide="file-down"></i>Exportar</button>`)}
       <div class="agenda-list">
@@ -585,15 +584,7 @@ function renderHistoryView() {
     return `<p class="empty-state">Área restrita ao administrador.</p>`;
   }
 
-  const completed = state.items
-    .filter((item) => item.status === "completed" && !item.deleted)
-    .sort(compareItems);
-
   return `
-    <section class="section" aria-label="Itens concluídos">
-      ${renderSectionTitle("Concluídos", `${completed.length} item(ns)`)}
-      ${completed.length ? `<div class="item-list">${completed.map((item) => renderItemCard(toOccurrence(item), { completed: true })).join("")}</div>` : `<p class="empty-state">Nenhum item concluído.</p>`}
-    </section>
     <section class="section" aria-label="Histórico imutável">
       ${renderSectionTitle("Histórico", `${state.history.length} ação(ões) registrada(s)`)}
       <div class="history-list">
@@ -603,18 +594,19 @@ function renderHistoryView() {
   `;
 }
 
-function renderPendingSection(pending) {
+function renderPreviousSection(items) {
   const open = state.pendingExpanded;
+  const label = getPreviousSectionLabel();
   return `
-    <section class="section pending-section" aria-label="Em aberto e vencido">
+    <section class="section pending-section" aria-label="${escapeAttr(label)}">
       <button class="pending-summary" type="button" data-action="toggle-pending" aria-expanded="${open}">
-        <span><i data-lucide="${open ? "chevron-down" : "chevron-right"}"></i><span class="section-heading-line"><strong>Em aberto/Vencido</strong> <span class="section-count">${pending.length}</span></span></span>
+        <span><i data-lucide="${open ? "chevron-down" : "chevron-right"}"></i><span class="section-heading-line"><strong>${escapeHtml(label)}</strong> <span class="section-count">${items.length}</span></span></span>
       </button>
       ${
         open
-          ? pending.length
-            ? `<div class="item-list pending-list">${pending.map(renderItemCard).join("")}</div>`
-            : `<p class="empty-state compact-empty">Sem itens em aberto ou vencidos.</p>`
+          ? items.length
+            ? `<div class="item-list pending-list">${items.map((item) => renderItemCard(item, { showDateInMeta: true })).join("")}</div>`
+            : `<p class="empty-state compact-empty">Sem eventos anteriores nesta janela.</p>`
           : ""
       }
     </section>
@@ -699,26 +691,21 @@ function renderGroupedDayList(items, start, end, options = {}) {
 
 function renderItemCard(item, options = {}) {
   const tagColor = getTagColor(item.tag);
-  const overdue = item.isOverdue || isOverdue(item);
   const timeText = formatTimeRange(item);
   const responsibility = formatResponsible(item);
   const priority = formatPriorityInline(item.priority);
   const title = getItemDisplayTitle(item);
-  const completed = options.completed || item.status === "completed";
+  const dateText = options.showDateInMeta ? formatDayMonth(item.occurrenceDate || item.date) : "";
   const metaParts = [
-    overdue ? `<span class="status-mini is-danger">Vencido</span>` : "",
-    completed ? `<span class="status-mini is-success">Concluído</span>` : "",
     priority ? `<span class="priority-mini">${escapeHtml(priority)}</span>` : "",
     `<span class="responsible-mini">${escapeHtml(responsibility)}</span>`,
+    dateText ? `<span class="date-mini">${escapeHtml(dateText)}</span>` : "",
     `<span class="time-mini">${escapeHtml(timeText || "Sem horário")}</span>`,
   ].filter(Boolean);
 
   return `
-    <article class="item-card ${overdue ? "is-overdue" : ""} ${completed ? "is-completed" : ""}" data-id="${escapeAttr(item.id)}" data-occurrence-id="${escapeAttr(item.occurrenceId || item.id)}" data-occurrence-date="${escapeAttr(item.occurrenceDate || item.date || "")}" data-tag-color="${tagColor}">
+    <article class="item-card" data-id="${escapeAttr(item.id)}" data-occurrence-id="${escapeAttr(item.occurrenceId || item.id)}" data-occurrence-date="${escapeAttr(item.occurrenceDate || item.date || "")}" data-tag-color="${tagColor}">
       <div class="item-card-header">
-        <button class="complete-box ${completed ? "is-checked" : ""}" type="button" data-action="${completed ? "reopen" : "complete"}" aria-label="${completed ? "Reabrir" : "Concluir"}">
-          ${completed ? `<i data-lucide="check"></i>` : ""}
-        </button>
         <button class="card-toggle" type="button" data-action="open-detail" aria-label="Abrir detalhes de ${escapeAttr(item.title || "item")}">
           <div class="item-main-line">
             <div class="item-title-row">
@@ -755,13 +742,9 @@ function renderDetailContent(item) {
   const timeText = formatTimeRange(item) || "Sem horário";
   const dateText = item.occurrenceDate || item.date ? formatLongDate(item.occurrenceDate || item.date) : "Sem data definida";
   const responsibility = formatResponsible(item);
-  const overdue = item.isOverdue || isOverdue(item);
-  const completed = item.status === "completed";
   const statusBadges = [
     `<span class="badge tag-badge">${escapeHtml(item.tag || "Sem tag")}</span>`,
     item.priority && item.priority !== "Não aplicável" ? `<span class="badge ${priorityClass(item.priority)}">${escapeHtml(item.priority)}</span>` : "",
-    overdue ? `<span class="badge badge-danger">Vencido</span>` : "",
-    item.status === "completed" ? `<span class="badge badge-success">Concluído</span>` : "",
     item.recurrence?.enabled || item.recurrenceParentId ? `<span class="badge">Recorrente</span>` : "",
   ]
     .filter(Boolean)
@@ -791,7 +774,6 @@ function renderDetailContent(item) {
     }
     <div class="detail-actions">
       <button class="secondary-button" type="button" data-detail-action="edit"><i data-lucide="pencil"></i>Editar</button>
-      <button class="secondary-button" type="button" data-detail-action="${completed ? "reopen" : "complete"}"><i data-lucide="${completed ? "rotate-ccw" : "check"}"></i>${completed ? "Reabrir" : "Concluir"}</button>
       <button class="danger-button" type="button" data-detail-action="delete"><i data-lucide="trash-2"></i>Excluir</button>
     </div>
   `;
@@ -808,7 +790,7 @@ function renderHistoryItem(entry) {
   const actor = entry.actor || "Não informado";
   const at = entry.actionAt || entry.createdAt || "";
   const note = entry.note ? `<p><strong>Observação:</strong> ${escapeHtml(entry.note)}</p>` : "";
-  const canRestore = ["excluído", "concluído", "excluido", "concluido"].includes(String(action).toLowerCase());
+  const canRestore = ["excluído", "excluido"].includes(String(action).toLowerCase());
   return `
     <article class="history-item" data-history-item-id="${escapeAttr(entry.itemId || "")}">
       <div class="badge-row">
@@ -887,8 +869,6 @@ async function handleViewClick(event) {
   if (action === "open-detail" || action === "toggle-card") openDetailModal(occurrence);
   if (action === "edit") await editOccurrence(occurrence);
   if (action === "delete") await deleteOccurrence(occurrence);
-  if (action === "complete") await completeOccurrence(occurrence);
-  if (action === "reopen") await reopenOccurrence(occurrence);
 }
 
 async function handleDetailModalClick(event) {
@@ -901,8 +881,6 @@ async function handleDetailModalClick(event) {
 
   if (action === "edit") await editOccurrence(occurrence);
   if (action === "delete") await deleteOccurrence(occurrence);
-  if (action === "complete") await completeOccurrence(occurrence);
-  if (action === "reopen") await reopenOccurrence(occurrence);
 }
 
 function openItemModal(occurrence = null) {
@@ -1143,71 +1121,6 @@ async function deleteOccurrence(occurrence) {
   }
 }
 
-async function completeOccurrence(occurrence) {
-  const ok = await ensureAdmin();
-  if (!ok) return;
-
-  let scope = "series";
-  if (requiresRecurrenceScope(occurrence)) {
-    scope = await askScope("Concluir item recorrente");
-    if (!scope) return;
-  }
-
-  const confirmed = await confirmAction({
-    eyebrow: "Concluir item",
-    title: "Confirmar conclusão",
-    message: "Somente administradores podem concluir tarefas. Esta ação será registrada no histórico.",
-    actionLabel: "Concluir",
-    defaultActor: "Administrador",
-  });
-  if (!confirmed.ok) return;
-
-  try {
-    await mutate("completeItem", {
-      id: occurrence.id,
-      occurrenceDate: occurrence.occurrenceDate || occurrence.date,
-      scope,
-      adminToken: state.adminToken,
-      actor: confirmed.actor,
-      note: confirmed.note,
-    });
-    toast("Item concluído com sucesso.", "success");
-    await loadItems();
-    render();
-  } catch (error) {
-    toast(error.message || "Não foi possível concluir o item.", "error");
-  }
-}
-
-async function reopenOccurrence(occurrence) {
-  const ok = await ensureAdmin();
-  if (!ok) return;
-  const confirmed = await confirmAction({
-    eyebrow: "Reabrir item",
-    title: "Confirmar reabertura",
-    message: "O item voltará a aparecer nas visualizações ativas.",
-    actionLabel: "Reabrir",
-    defaultActor: "Administrador",
-  });
-  if (!confirmed.ok) return;
-
-  try {
-    await mutate("reopenItem", {
-      id: occurrence.id,
-      occurrenceDate: occurrence.occurrenceDate || occurrence.date,
-      adminToken: state.adminToken,
-      actor: confirmed.actor,
-      note: confirmed.note,
-    });
-    toast("Item reaberto com sucesso.", "success");
-    await loadItems();
-    if (state.view === "history") await loadHistory();
-    render();
-  } catch (error) {
-    toast(error.message || "Não foi possível reabrir o item.", "error");
-  }
-}
-
 async function restoreHistoryItem(itemId) {
   if (!itemId) return;
   const ok = await ensureAdmin();
@@ -1246,10 +1159,10 @@ function exportAgendaPdf() {
   }
 
   const today = toISODate(new Date());
-  const start = state.currentDate < today ? state.currentDate : today;
+  const start = state.currentDate > today ? state.currentDate : today;
   const end = addDaysISO(start, 90);
   const agendaItems = applyFiltersAndSort(buildOccurrences(start, end));
-  const pending = getPendingOccurrences();
+  const previous = getPreviousOccurrences();
   const byDate = groupByDate(agendaItems);
   const doc = new PDFCtor({ unit: "pt", format: "a4" });
   const page = { width: 595.28, height: 841.89, margin: 44 };
@@ -1295,9 +1208,9 @@ function exportAgendaPdf() {
   line(`Filtros: Tag ${filterLabel(state.filters.tag)} | Prioridade ${filterLabel(state.filters.priority)} | Responsável ${responsibleFilterLabel(state.filters.responsible)}`, 9, [82, 97, 115], 13);
   y += 10;
 
-  if (pending.length) {
-    heading(`Em aberto/Vencido (${pending.length})`, 12);
-    pending.forEach((item) => {
+  if (previous.length) {
+    heading(`${getPreviousSectionLabel()} (${previous.length})`, 12);
+    previous.forEach((item) => {
       line(`- ${item.title} | ${item.tag} | ${item.occurrenceDate || item.date ? formatShortDate(item.occurrenceDate || item.date) : "Sem data"} | ${formatTimeRange(item) || "Sem horário"} | ${formatResponsible(item)}`, 9, [49, 65, 87], 13);
     });
     y += 8;
@@ -1545,20 +1458,8 @@ function demoApi(action, payload = {}) {
     nextItems = deleteDemoItem(nextItems, history, payload, actor, now);
   }
 
-  if (action === "completeItem") {
-    if (!payload.adminToken) return Promise.resolve({ ok: false, error: "Acesso administrativo obrigatório." });
-    nextItems = completeDemoItem(nextItems, history, payload, actor, now);
-  }
-
-  if (action === "reopenItem") {
-    if (!payload.adminToken) return Promise.resolve({ ok: false, error: "Acesso administrativo obrigatório." });
-    nextItems = nextItems.map((item) => {
-      if (item.id !== payload.id) return item;
-      const original = { ...item };
-      const updated = { ...item, status: "active", completedAt: "", completedBy: "", updatedAt: now };
-      appendDemoHistory(history, "reaberto", updated, original, updated, actor, payload.note);
-      return updated;
-    });
+  if (action === "completeItem" || action === "reopenItem") {
+    return Promise.resolve({ ok: false, error: "A conclusão de itens foi desativada no Portal SP2." });
   }
 
   if (action === "restoreItem") {
@@ -1623,7 +1524,7 @@ function seedDemoItems() {
       priority: "Alta",
       createdBy: "Vinicius",
       responsibilityMode: "Todos",
-      description: "Item de demonstração vencido para validar a área Em aberto/Vencido.",
+      description: "Item de demonstração anterior para validar a área de últimos eventos.",
       status: "active",
       deleted: false,
       createdAt: new Date().toISOString(),
@@ -1741,25 +1642,6 @@ function deleteDemoItem(items, history, payload, actor, now) {
   });
 }
 
-function completeDemoItem(items, history, payload, actor, now) {
-  return items.map((item) => {
-    if (item.id !== payload.id) return item;
-    const original = { ...item };
-    let updated;
-    if (requiresRecurrenceScope(item) && payload.scope === "single") {
-      const completedOccurrences = { ...(item.completedOccurrences || {}) };
-      completedOccurrences[payload.occurrenceDate] = { completedAt: now, completedBy: actor };
-      updated = { ...item, completedOccurrences, updatedAt: now };
-    } else if (requiresRecurrenceScope(item) && payload.scope === "future") {
-      updated = { ...item, completedFromDate: payload.occurrenceDate, updatedAt: now };
-    } else {
-      updated = { ...item, status: "completed", completedAt: now, completedBy: actor, updatedAt: now };
-    }
-    appendDemoHistory(history, "concluído", updated, original, updated, actor, payload.note);
-    return normalizeItem(updated);
-  });
-}
-
 function appendDemoHistory(history, action, item, original, next, actor, note = "") {
   history.push({
     id: createId("hist"),
@@ -1813,10 +1695,9 @@ function buildOccurrences(startISO, endISO, options = {}) {
   return occurrences;
 }
 
-function getActiveItems(includeCompleted = false) {
+function getActiveItems() {
   return state.items.filter((item) => {
     if (item.deleted || item.active === false) return false;
-    if (!includeCompleted && item.status === "completed") return false;
     return true;
   });
 }
@@ -1874,8 +1755,6 @@ function matchesRecurrencePattern(startISO, recurrence, candidateISO) {
 
 function isSkippedOccurrence(item, iso) {
   if ((item.exceptionDates || []).includes(iso)) return true;
-  if (item.completedOccurrences && item.completedOccurrences[iso]) return true;
-  if (item.completedFromDate && iso >= item.completedFromDate) return true;
   return false;
 }
 
@@ -1884,37 +1763,46 @@ function toOccurrence(item, occurrenceDate = item.date || "") {
   occurrence.occurrenceDate = occurrenceDate;
   occurrence.occurrenceId = item.recurrence?.enabled && occurrenceDate ? `${item.id}:${occurrenceDate}` : item.id;
   occurrence.isRecurringOccurrence = Boolean(item.recurrence?.enabled && occurrenceDate);
-  occurrence.isOverdue = isOverdue(occurrence);
   return occurrence;
 }
 
-function getPendingOccurrences() {
+function getPreviousSectionLabel() {
+  if (state.view === "month") return "Últimos 30 dias";
+  if (state.view === "agenda") return "Todos os eventos anteriores";
+  return "Últimos 7 dias";
+}
+
+function getPreviousOccurrences() {
   const today = toISODate(new Date());
-  const overdueStart = addDaysISO(today, -365);
-  const overdue = buildOccurrences(overdueStart, addDaysISO(today, -1)).filter(isOverdue);
-  const undated = getActiveItems().filter((item) => !item.date).map((item) => toOccurrence(item));
-  return applyFiltersAndSort(overdue.concat(undated)).sort((a, b) => {
-    if (a.isOverdue !== b.isOverdue) return a.isOverdue ? -1 : 1;
-    return compareItems(a, b);
-  });
+  const end = addDaysISO(today, -1);
+  if (end >= today) return [];
+
+  let start = addDaysISO(today, -7);
+  if (state.view === "month") start = addDaysISO(today, -30);
+  if (state.view === "agenda") start = getEarliestActiveDate() || addDaysISO(today, -365);
+
+  if (start > end) return [];
+  return applyFilters(buildOccurrences(start, end)).sort(compareItemsNewestFirst);
 }
 
 function applyFiltersAndSort(items) {
-  return items
-    .filter((item) => {
-      if (state.filters.tag !== "all" && item.tag !== state.filters.tag) return false;
-      if (state.filters.priority !== "all" && item.priority !== state.filters.priority) return false;
-      if (state.filters.responsible === "everyone" && item.responsibilityMode !== "Todos") return false;
-      if (
-        state.filters.responsible !== "all" &&
-        state.filters.responsible !== "everyone" &&
-        (item.responsibilityMode !== "Individual" || item.responsibleName !== state.filters.responsible)
-      ) {
-        return false;
-      }
-      return true;
-    })
-    .sort(compareItems);
+  return applyFilters(items).sort(compareItems);
+}
+
+function applyFilters(items) {
+  return items.filter((item) => {
+    if (state.filters.tag !== "all" && item.tag !== state.filters.tag) return false;
+    if (state.filters.priority !== "all" && item.priority !== state.filters.priority) return false;
+    if (state.filters.responsible === "everyone" && item.responsibilityMode !== "Todos") return false;
+    if (
+      state.filters.responsible !== "all" &&
+      state.filters.responsible !== "everyone" &&
+      (item.responsibilityMode !== "Individual" || item.responsibleName !== state.filters.responsible)
+    ) {
+      return false;
+    }
+    return true;
+  });
 }
 
 function compareItems(a, b) {
@@ -1930,6 +1818,21 @@ function compareItems(a, b) {
   const dateB = b.occurrenceDate || b.date || "9999-12-31";
   if (dateA !== dateB) return dateA.localeCompare(dateB);
   return String(a.startTime || "99:99").localeCompare(String(b.startTime || "99:99"));
+}
+
+function compareItemsNewestFirst(a, b) {
+  const dateA = a.occurrenceDate || a.date || "0000-00-00";
+  const dateB = b.occurrenceDate || b.date || "0000-00-00";
+  if (dateA !== dateB) return dateB.localeCompare(dateA);
+  return String(b.startTime || "00:00").localeCompare(String(a.startTime || "00:00"));
+}
+
+function getEarliestActiveDate() {
+  const dates = getActiveItems()
+    .map((item) => item.date)
+    .filter(Boolean)
+    .sort();
+  return dates[0] || "";
 }
 
 function groupByDate(items) {
@@ -1953,7 +1856,7 @@ function findOccurrence(occurrenceId, fallbackId = "", occurrenceDate = "") {
     history: [addDaysISO(toISODate(new Date()), -365), addDaysISO(toISODate(new Date()), 365)],
   };
   const [start, end] = ranges[state.view] || ranges.today;
-  const occurrences = buildOccurrences(start, end, { includeCompleted: state.view === "history", includeUndated: true }).concat(getPendingOccurrences());
+  const occurrences = buildOccurrences(start, end, { includeUndated: true }).concat(getPreviousOccurrences());
   return (
     occurrences.find((item) => item.occurrenceId === occurrenceId) ||
     occurrences.find((item) => item.id === fallbackId && (!occurrenceDate || item.occurrenceDate === occurrenceDate)) ||
@@ -2039,12 +1942,6 @@ function safeJson(value, fallback = {}) {
   }
 }
 
-function isOverdue(item) {
-  const date = item.occurrenceDate || item.date;
-  if (!date || item.status === "completed") return false;
-  return date < toISODate(new Date());
-}
-
 function formatTimeRange(item) {
   if (!item.startTime && !item.endTime && !item.durationMinutes) return "";
   if (item.startTime && item.endTime) return `${item.startTime} - ${item.endTime}`;
@@ -2076,7 +1973,6 @@ function getRecurrenceText(item) {
 }
 
 function getHistorySummary(item) {
-  if (item.completedAt) return `Concluído por ${item.completedBy || "administrador"} em ${formatDateTime(item.completedAt)}.`;
   if (item.updatedAt) return `Última atualização em ${formatDateTime(item.updatedAt)}.`;
   if (item.createdAt) return `Criado em ${formatDateTime(item.createdAt)}.`;
   return "Sem histórico resumido disponível.";
@@ -2226,6 +2122,12 @@ function formatShortDate(iso) {
   if (!iso) return "Sem data";
   const date = parseISODate(iso);
   return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
+}
+
+function formatDayMonth(iso) {
+  if (!iso) return "Sem data";
+  const date = parseISODate(iso);
+  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function formatDayHeading(iso) {
