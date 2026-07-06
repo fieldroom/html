@@ -1,6 +1,6 @@
 const CONFIG = {
   WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwdYPJRIQytV1mZ7IxkHgWrxm3DrZQXODdBmkBYaYASKlVReYijAMpgOYhZ4pHt9JTYPA/exec",
-  APP_VERSION: "1.0.13",
+  APP_VERSION: "1.0.14",
   DEMO_STORAGE_KEY: "portal-sp2-items-v1",
   DEMO_HISTORY_KEY: "portal-sp2-history-v1",
   ADMIN_SESSION_KEY: "portal-sp2-admin-session",
@@ -1942,9 +1942,9 @@ function normalizeItem(item) {
     id: item.id || createId("item"),
     type: item.type || getTagRule(tag).type,
     title: item.title || "",
-    date: item.date || "",
-    startTime: item.startTime || "",
-    endTime: item.endTime || "",
+    date: sanitizeDateValue(item.date),
+    startTime: sanitizeTimeValue(item.startTime),
+    endTime: sanitizeTimeValue(item.endTime),
     durationMinutes: item.durationMinutes || "",
     tag,
     priority: item.priority || "Não aplicável",
@@ -1956,10 +1956,10 @@ function normalizeItem(item) {
     description: item.description || "",
     recurrence: normalizeRecurrence(item.recurrence),
     recurrenceParentId: item.recurrenceParentId || "",
-    recurrenceOriginalDate: item.recurrenceOriginalDate || "",
+    recurrenceOriginalDate: sanitizeDateValue(item.recurrenceOriginalDate),
     exceptionDates: Array.isArray(item.exceptionDates) ? item.exceptionDates : safeJson(item.exceptionDates, []),
     completedOccurrences: item.completedOccurrences && typeof item.completedOccurrences === "object" ? item.completedOccurrences : safeJson(item.completedOccurrences, {}),
-    completedFromDate: item.completedFromDate || "",
+    completedFromDate: sanitizeDateValue(item.completedFromDate),
     status: item.status || "active",
     active: item.active === false || item.active === "FALSE" ? false : true,
     deleted: item.deleted === true || item.deleted === "TRUE",
@@ -1970,6 +1970,27 @@ function normalizeItem(item) {
     createdAt: item.createdAt || "",
     updatedAt: item.updatedAt || "",
   };
+}
+
+function sanitizeDateValue(value) {
+  const text = String(value || "").trim();
+  if (!text || text === "1899-12-30") return "";
+  const isoDate = text.match(/^(\d{4}-\d{2}-\d{2})/);
+  return isoDate ? isoDate[1] : text;
+}
+
+function sanitizeTimeValue(value) {
+  const text = String(value || "").trim();
+  if (!text || text === "1899-12-30") return "";
+
+  const plainTime = text.match(/^(\d{1,2}):(\d{2})/);
+  if (plainTime) return `${plainTime[1].padStart(2, "0")}:${plainTime[2]}`;
+
+  const embeddedTime = text.match(/[T\s](\d{1,2}):(\d{2})/);
+  if (embeddedTime) return `${embeddedTime[1].padStart(2, "0")}:${embeddedTime[2]}`;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return "";
+  return text;
 }
 
 function normalizeRecurrence(recurrence) {
