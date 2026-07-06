@@ -1,8 +1,9 @@
 const CONFIG = {
   WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwdYPJRIQytV1mZ7IxkHgWrxm3DrZQXODdBmkBYaYASKlVReYijAMpgOYhZ4pHt9JTYPA/exec",
-  APP_VERSION: "1.0.14",
+  APP_VERSION: "1.0.15",
   DEMO_STORAGE_KEY: "portal-sp2-items-v1",
   DEMO_HISTORY_KEY: "portal-sp2-history-v1",
+  CLOUD_CACHE_KEY: "portal-sp2-cloud-cache-v1",
   ADMIN_SESSION_KEY: "portal-sp2-admin-session",
   LAST_ACTOR_KEY: "portal-sp2-last-actor",
 };
@@ -128,8 +129,9 @@ async function init() {
   hydrateAdminSession();
   updateResponsibleControls();
   updateDateTimeControls();
-  await loadItems();
+  hydrateCachedItems();
   render();
+  loadItems({ showLoading: state.items.length === 0, renderAfter: true });
 }
 
 function cacheElements() {
@@ -347,19 +349,52 @@ function exitAdminMode() {
   toast("Modo administrador encerrado.", "success");
 }
 
-async function loadItems() {
-  state.loading = true;
-  renderLoading();
+async function loadItems(options = {}) {
+  const showLoading = options.showLoading === true;
+  if (showLoading) {
+    state.loading = true;
+    renderLoading();
+  }
   try {
     const result = await apiRequest("listItems", {});
     if (!result.ok) throw new Error(result.error || "Falha ao listar itens.");
     state.items = (result.items || []).map(normalizeItem);
     state.lastSync = result.serverNow || new Date().toISOString();
+    cacheCloudItems();
   } catch (error) {
     toast("Não foi possível carregar os dados. Verifique sua conexão e tente novamente.", "error");
     console.error(error);
   } finally {
     state.loading = false;
+    if (options.renderAfter) render();
+  }
+}
+
+function hydrateCachedItems() {
+  if (!CONFIG.WEB_APP_URL) return;
+  try {
+    const cached = JSON.parse(localStorage.getItem(CONFIG.CLOUD_CACHE_KEY) || "{}");
+    if (!Array.isArray(cached.items)) return;
+    state.items = cached.items.map(normalizeItem);
+    state.lastSync = cached.lastSync || "";
+  } catch (error) {
+    localStorage.removeItem(CONFIG.CLOUD_CACHE_KEY);
+  }
+}
+
+function cacheCloudItems() {
+  if (!CONFIG.WEB_APP_URL) return;
+  try {
+    localStorage.setItem(
+      CONFIG.CLOUD_CACHE_KEY,
+      JSON.stringify({
+        items: state.items,
+        lastSync: state.lastSync,
+        cachedAt: new Date().toISOString(),
+      }),
+    );
+  } catch (error) {
+    console.warn("Não foi possível salvar cache local.", error);
   }
 }
 
@@ -886,9 +921,9 @@ function openItemModal(occurrence = null) {
   };
 
   els.itemTitle.value = base.title || "";
-  els.itemDate.value = base.occurrenceDate || base.date || "";
-  els.itemStartTime.value = base.startTime || "";
-  els.itemEndTime.value = base.endTime || "";
+  els.itemDate.value = sanitizeDateValue(base.occurrenceDate || base.date);
+  els.itemStartTime.value = sanitizeTimeValue(base.startTime);
+  els.itemEndTime.value = sanitizeTimeValue(base.endTime);
   els.itemDuration.value = base.durationMinutes || "";
   els.itemTag.value = base.tag || "";
   els.itemPriority.value = base.priority || "Não aplicável";
@@ -946,25 +981,38 @@ async function handleItemSubmit(event) {
         scope = await askScope("Editar item recorrente");
         if (!scope) return;
       }
-      await mutate("editItem", {
+      const result = await mutate("editItem", {
         id: state.editingOccurrence.id,
         occurrenceDate: state.editingOccurrence.occurrenceDate || state.editingOccurrence.date,
         scope,
         item: payload.item,
         actor,
       });
+      syncMutatedItem(result);
       toast("Item editado com sucesso. A atualização já está disponível para todos os usuários.", "success");
     } else {
-      await mutate("createItem", { item: payload.item, actor });
+      const result = await mutate("createItem", { item: payload.item, actor });
+      syncMutatedItem(result);
       toast("Item adicionado com sucesso. Ele já está disponível para todos os usuários.", "success");
     }
     closeModal(els.itemModal);
-    await loadItems();
     render();
+    loadItems({ renderAfter: true });
   } catch (error) {
     console.error(error);
     toast(error.message || "Não foi possível salvar. Verifique sua conexão e tente novamente.", "error");
   }
+}
+
+function syncMutatedItem(result) {
+  if (!result?.item) return false;
+  const item = normalizeItem(result.item);
+  const index = state.items.findIndex((current) => current.id === item.id);
+  if (index >= 0) state.items[index] = item;
+  else state.items.push(item);
+  state.lastSync = result.serverNow || new Date().toISOString();
+  cacheCloudItems();
+  return true;
 }
 
 function collectFormPayload() {
@@ -1407,36 +1455,12 @@ async function apiRequest(action, payload = {}, options = {}) {
     return demoApi(action, payload);
   }
 
-  if (!options.mutation) {
-    return jsonpRequest(action, payload);
-  }
-
-  const requestId = createId("req");
-  const envelope = { action, payload, requestId };
-  const body = JSON.stringify(envelope);
-
-  try {
-    const response = await fetch(CONFIG.WEB_APP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body,
-    });
-    const text = await response.text();
-    const data = JSON.parse(text);
-    if (!data.ok) throw new Error(data.error || "Ação não concluída.");
-    return data;
-  } catch (error) {
-    await fetch(CONFIG.WEB_APP_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body,
-    });
-    return { ok: true, assumed: true, warning: error.message };
-  }
+  return jsonpRequest(action, payload, {
+    requestId: options.mutation ? createId("req") : "",
+  });
 }
 
-function jsonpRequest(action, payload = {}) {
+function jsonpRequest(action, payload = {}, options = {}) {
   return new Promise((resolve, reject) => {
     const callback = `portalSp2Callback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const script = document.createElement("script");
@@ -1460,6 +1484,7 @@ function jsonpRequest(action, payload = {}) {
     url.searchParams.set("action", action);
     url.searchParams.set("payload", JSON.stringify(payload));
     url.searchParams.set("callback", callback);
+    if (options.requestId) url.searchParams.set("requestId", options.requestId);
     url.searchParams.set("_", Date.now().toString());
     script.onerror = () => {
       cleanup();
