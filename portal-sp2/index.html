@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Portal SP2</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="styles.css?v=1.0.13" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <div class="brand-block">
+          <div>
+            <p class="eyebrow">Calendário geral</p>
+            <h1>Portal SP2</h1>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Visualizações">
+          <button class="nav-item is-active" type="button" data-view="today">
+            <i data-lucide="sun"></i>
+            <span>Hoje</span>
+          </button>
+          <button class="nav-item" type="button" data-view="month">
+            <i data-lucide="calendar-days"></i>
+            <span>Mês</span>
+          </button>
+          <button class="nav-item" type="button" data-view="week">
+            <i data-lucide="columns-3"></i>
+            <span>Semana</span>
+          </button>
+          <button class="nav-item" type="button" data-view="day">
+            <i data-lucide="calendar"></i>
+            <span>Dia</span>
+          </button>
+          <button class="nav-item" type="button" data-view="agenda">
+            <i data-lucide="list-tree"></i>
+            <span>Programação</span>
+          </button>
+          <button class="nav-item" type="button" data-view="history">
+            <i data-lucide="history"></i>
+            <span>Acesso Editor</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button class="text-button" id="adminExitButton" type="button" hidden>
+            <i data-lucide="log-out"></i>
+            Sair do modo administrador
+          </button>
+          <p id="syncLabel" class="sync-label">Modo local</p>
+        </div>
+      </aside>
+
+      <div class="main-shell">
+        <header class="topbar">
+          <div class="topbar-title">
+            <p class="eyebrow" id="currentScopeLabel">Visão</p>
+            <h2 id="viewTitle">Hoje</h2>
+          </div>
+
+          <div class="topbar-actions">
+            <button class="secondary-button" id="refreshButton" type="button">
+              <i data-lucide="refresh-cw"></i>
+              Atualizar
+            </button>
+            <button class="primary-button" id="newItemButton" type="button">
+              <i data-lucide="plus"></i>
+              Novo item
+            </button>
+          </div>
+        </header>
+
+        <section class="mobile-nav-drawer" id="mobileNavDrawer" aria-label="Menu mobile">
+          <button class="mobile-nav-brand" type="button" data-view="today">Portal SP2</button>
+          <button class="nav-item is-active" type="button" data-view="today">
+            <i data-lucide="sun"></i>
+            <span>Hoje</span>
+          </button>
+          <button class="nav-item" type="button" data-view="month">
+            <i data-lucide="calendar-days"></i>
+            <span>Mês</span>
+          </button>
+          <button class="nav-item" type="button" data-view="week">
+            <i data-lucide="columns-3"></i>
+            <span>Semana</span>
+          </button>
+          <button class="nav-item" type="button" data-view="day">
+            <i data-lucide="calendar"></i>
+            <span>Dia</span>
+          </button>
+          <button class="nav-item" type="button" data-view="agenda">
+            <i data-lucide="list-tree"></i>
+            <span>Programação</span>
+          </button>
+          <button class="nav-item" type="button" data-view="history">
+            <i data-lucide="history"></i>
+            <span>Acesso Editor</span>
+          </button>
+        </section>
+
+        <section class="control-strip" aria-label="Filtros e período">
+          <div class="date-controls">
+            <button class="icon-button" id="prevPeriodButton" type="button" aria-label="Período anterior">
+              <i data-lucide="chevron-left"></i>
+            </button>
+            <input id="scopeDateInput" class="date-input" type="date" aria-label="Data de referência" />
+            <button class="icon-button" id="nextPeriodButton" type="button" aria-label="Próximo período">
+              <i data-lucide="chevron-right"></i>
+            </button>
+            <button class="text-button" id="todayButton" type="button">Hoje</button>
+          </div>
+
+          <div class="filter-controls">
+            <label>
+              <span>Tag</span>
+              <select id="tagFilter"></select>
+            </label>
+            <label>
+              <span>Prioridade</span>
+              <select id="priorityFilter"></select>
+            </label>
+            <label>
+              <span>Responsável</span>
+              <select id="responsibleFilter"></select>
+            </label>
+            <label>
+              <span>Ordenar</span>
+              <select id="sortFilter">
+                <option value="datetime">Data/horário</option>
+                <option value="priority">Prioridade</option>
+                <option value="tag">Tag</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <div id="adminBanner" class="admin-banner" hidden>
+          <i data-lucide="shield-check"></i>
+          <span>Modo administrador ativo nesta sessão.</span>
+          <button class="text-button" id="adminExitButtonTop" type="button">Sair</button>
+        </div>
+
+        <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="true"></div>
+        <main id="viewRoot" class="view-root" tabindex="-1"></main>
+      </div>
+    </div>
+
+    <button class="fab" id="mobileFab" type="button" aria-label="Novo item">
+      <i data-lucide="plus"></i>
+    </button>
+
+    <dialog class="modal" id="itemModal">
+      <form id="itemForm" class="modal-panel" method="dialog" novalidate>
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Cadastro</p>
+            <h2 id="itemModalTitle">Novo item</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-modal aria-label="Fechar">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="form-grid">
+          <label class="field field-wide">
+            <span>Título</span>
+            <input id="itemTitle" name="title" type="text" autocomplete="off" required maxlength="120" />
+          </label>
+
+          <label class="field field-wide">
+            <span>Tag/categoria</span>
+            <select id="itemTag" name="tag" required></select>
+          </label>
+
+          <label class="field">
+            <span>Data</span>
+            <input id="itemDate" name="date" type="date" disabled />
+          </label>
+
+          <label class="field">
+            <span>Horário inicial</span>
+            <input id="itemStartTime" name="startTime" type="time" step="300" disabled />
+          </label>
+
+          <label class="field">
+            <span>Horário final</span>
+            <input id="itemEndTime" name="endTime" type="time" step="300" disabled />
+          </label>
+
+          <label class="field">
+            <span>Duração</span>
+            <select id="itemDuration" name="durationMinutes" disabled>
+              <option value="">Sem duração</option>
+              <option value="15">15 min</option>
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
+              <option value="60">1 hora</option>
+              <option value="90">1h30</option>
+              <option value="120">2 horas</option>
+              <option value="180">3 horas</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Prioridade</span>
+            <select id="itemPriority" name="priority" required></select>
+          </label>
+
+          <label class="field">
+            <span>Inserido por</span>
+            <input id="itemCreatedBy" name="createdBy" type="text" autocomplete="name" required maxlength="80" />
+          </label>
+
+          <fieldset class="field fieldset field-wide responsible-field">
+            <legend>Responsável</legend>
+            <div class="responsible-options">
+              <label class="choice-row">
+                <input type="radio" name="responsibilityMode" value="Todos" checked />
+                <span>Todos</span>
+              </label>
+              <label class="choice-row">
+                <input type="radio" name="responsibilityMode" value="Individual" />
+                <span>Individual</span>
+              </label>
+            </div>
+            <select id="responsibleName" name="responsibleName" disabled></select>
+          </fieldset>
+
+          <label class="field field-wide">
+            <span>Local</span>
+            <input id="itemLocation" name="location" type="text" autocomplete="off" maxlength="160" />
+          </label>
+
+          <label class="field field-wide">
+            <span>Link</span>
+            <input id="itemLink" name="link" type="url" inputmode="url" autocomplete="off" placeholder="https://..." />
+          </label>
+
+          <label class="field field-wide">
+            <span>Descrição/observações</span>
+            <textarea id="itemDescription" name="description" rows="4" maxlength="1500"></textarea>
+          </label>
+        </div>
+
+        <section class="recurrence-box" aria-label="Recorrência">
+          <label class="switch-row">
+            <input id="recurrenceEnabled" name="recurrenceEnabled" type="checkbox" />
+            <span>Configurar recorrência</span>
+          </label>
+
+          <div id="recurrenceFields" class="recurrence-fields" hidden>
+            <label class="field">
+              <span>Frequência</span>
+              <select id="recurrenceFrequency" name="recurrenceFrequency">
+                <option value="daily">Diária</option>
+                <option value="weekly">Semanal</option>
+                <option value="monthly">Mensal</option>
+                <option value="yearly">Anual</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Repetir a cada</span>
+              <input id="recurrenceInterval" name="recurrenceInterval" type="number" min="1" max="36" value="1" />
+            </label>
+
+            <fieldset class="field field-wide weekday-picker" id="weekdayPicker">
+              <legend>Dias da semana</legend>
+              <label><input type="checkbox" value="1" />Seg</label>
+              <label><input type="checkbox" value="2" />Ter</label>
+              <label><input type="checkbox" value="3" />Qua</label>
+              <label><input type="checkbox" value="4" />Qui</label>
+              <label><input type="checkbox" value="5" />Sex</label>
+              <label><input type="checkbox" value="6" />Sáb</label>
+              <label><input type="checkbox" value="0" />Dom</label>
+            </fieldset>
+
+            <fieldset class="field field-wide fieldset">
+              <legend>Término</legend>
+              <label class="choice-row">
+                <input type="radio" name="recurrenceEndMode" value="never" checked />
+                <span>Sem fim definido</span>
+              </label>
+              <label class="choice-row">
+                <input type="radio" name="recurrenceEndMode" value="on" />
+                <span>Data de término</span>
+              </label>
+              <input id="recurrenceUntil" name="recurrenceUntil" type="date" disabled />
+              <label class="choice-row">
+                <input type="radio" name="recurrenceEndMode" value="after" />
+                <span>Número de ocorrências</span>
+              </label>
+              <input id="recurrenceCount" name="recurrenceCount" type="number" min="1" max="500" value="10" disabled />
+            </fieldset>
+          </div>
+        </section>
+
+        <p id="formError" class="form-error" role="alert" hidden></p>
+
+        <div class="modal-actions">
+          <button class="secondary-button" type="button" data-close-modal>Cancelar</button>
+          <button class="primary-button" type="submit">
+            <i data-lucide="save"></i>
+            Salvar item
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="detailModal">
+      <div class="modal-panel modal-panel-detail">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Detalhes</p>
+            <h2 id="detailModalTitle">Detalhes do item</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-modal aria-label="Fechar">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div id="detailContent" class="detail-content"></div>
+      </div>
+    </dialog>
+
+    <dialog class="modal" id="adminModal">
+      <form id="adminForm" class="modal-panel modal-panel-small" method="dialog" novalidate>
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Acesso restrito</p>
+            <h2>Administrador</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-modal aria-label="Fechar">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <input type="text" name="username" autocomplete="username" value="Administrador" hidden />
+        <label class="field">
+          <span>Senha de administrador</span>
+          <input id="adminPassword" type="password" autocomplete="current-password" required />
+        </label>
+        <p id="adminError" class="form-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button class="secondary-button" type="button" data-close-modal>Cancelar</button>
+          <button class="primary-button" type="submit">
+            <i data-lucide="shield-check"></i>
+            Entrar
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="confirmModal">
+      <form id="confirmForm" class="modal-panel modal-panel-small" method="dialog">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow" id="confirmEyebrow">Confirmação</p>
+            <h2 id="confirmTitle">Confirmar ação</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-modal aria-label="Fechar">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <p id="confirmMessage" class="confirm-message"></p>
+        <label class="field">
+          <span>Observação opcional</span>
+          <textarea id="confirmNote" rows="3" maxlength="500"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button class="secondary-button" type="button" data-close-modal>Cancelar</button>
+          <button class="danger-button" id="confirmActionButton" type="submit">Confirmar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="scopeModal">
+      <form id="scopeForm" class="modal-panel modal-panel-small" method="dialog">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Item recorrente</p>
+            <h2 id="scopeTitle">Aplicar alteração</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-modal aria-label="Fechar">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="scope-options">
+          <button class="scope-option" type="button" data-scope="single">
+            <strong>Apenas esta ocorrência</strong>
+            <span>Altera somente o item selecionado.</span>
+          </button>
+          <button class="scope-option" type="button" data-scope="future">
+            <strong>Esta e as futuras</strong>
+            <span>Mantém o passado e aplica daqui para frente.</span>
+          </button>
+          <button class="scope-option" type="button" data-scope="series">
+            <strong>Toda a série</strong>
+            <span>Aplica em todas as ocorrências da recorrência.</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="app.js?v=1.0.13" defer></script>
+  </body>
+</html>
