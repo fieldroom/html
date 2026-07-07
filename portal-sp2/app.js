@@ -1,6 +1,6 @@
 const CONFIG = {
   WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwdYPJRIQytV1mZ7IxkHgWrxm3DrZQXODdBmkBYaYASKlVReYijAMpgOYhZ4pHt9JTYPA/exec",
-  APP_VERSION: "1.0.17",
+  APP_VERSION: "1.0.18",
   DEMO_STORAGE_KEY: "portal-sp2-items-v1",
   DEMO_HISTORY_KEY: "portal-sp2-history-v1",
   CLOUD_CACHE_KEY: "portal-sp2-cloud-cache-v1",
@@ -513,7 +513,7 @@ function renderMonthView() {
         <div class="month-chip-list">
           ${items
             .slice(0, 4)
-            .map((item) => monthChip(item))
+            .map((item, index) => monthChip(item, { sequence: index + 1 }))
             .join("")}
           ${items.length > 4 ? `<button class="month-chip" type="button" data-jump-day="${iso}">+${items.length - 4} itens</button>` : ""}
         </div>
@@ -605,7 +605,7 @@ function renderPreviousSection(items) {
       ${
         open
           ? items.length
-            ? `<div class="item-list pending-list">${items.map((item) => renderItemCard(item, { showDateInMeta: true })).join("")}</div>`
+            ? `<div class="item-list pending-list">${renderItemCards(items, { showDateInMeta: true })}</div>`
             : `<p class="empty-state compact-empty">Sem eventos anteriores nesta janela.</p>`
           : ""
       }
@@ -616,7 +616,7 @@ function renderPreviousSection(items) {
 function renderCollapsibleSection(sectionId, title, subtitle, items, options = {}) {
   const open = !state.collapsedSections.has(sectionId);
   const bodyClass = options.bodyClass || "item-list";
-  const content = options.contentHtml || (items.length ? items.map(renderItemCard).join("") : `<p class="empty-state">Sem itens nesta seleção.</p>`);
+  const content = options.contentHtml || (items.length ? renderItemCards(items) : `<p class="empty-state">Sem itens nesta seleção.</p>`);
 
   return `
     <section class="section section-panel collapsible-section" aria-label="${escapeAttr(title)}">
@@ -638,7 +638,7 @@ function renderSection(title, subtitle, items) {
   return `
     <section class="section section-panel" aria-label="${escapeAttr(title)}">
       ${renderSectionTitle(title, subtitle)}
-      ${items.length ? `<div class="item-list">${items.map(renderItemCard).join("")}</div>` : `<p class="empty-state">Sem itens nesta seleção.</p>`}
+      ${items.length ? `<div class="item-list">${renderItemCards(items)}</div>` : `<p class="empty-state">Sem itens nesta seleção.</p>`}
     </section>
   `;
 }
@@ -679,7 +679,7 @@ function renderGroupedDayList(items, start, end, options = {}) {
         </div>
         ${
           dayItems.length
-            ? `<div class="item-list day-item-list">${dayItems.map(renderItemCard).join("")}</div>`
+            ? `<div class="item-list day-item-list">${renderItemCards(dayItems)}</div>`
             : `<p class="empty-state compact-empty day-empty">Sem itens.</p>`
         }
       </div>
@@ -689,6 +689,10 @@ function renderGroupedDayList(items, start, end, options = {}) {
   return blocks.length ? blocks.join("") : `<p class="empty-state">Sem itens nesta seleção.</p>`;
 }
 
+function renderItemCards(items, options = {}) {
+  return items.map((item, index) => renderItemCard(item, { ...options, sequence: index + 1 })).join("");
+}
+
 function renderItemCard(item, options = {}) {
   const tagColor = getTagColor(item.tag);
   const timeText = formatTimeRange(item);
@@ -696,6 +700,7 @@ function renderItemCard(item, options = {}) {
   const priority = formatPriorityInline(item.priority);
   const title = getItemDisplayTitle(item);
   const dateText = options.showDateInMeta ? formatDayMonth(item.occurrenceDate || item.date) : "";
+  const sequence = Number.isFinite(options.sequence) ? `${options.sequence}.` : "";
   const metaParts = [
     priority ? `<span class="priority-mini ${priorityToneClass(item.priority)}">${escapeHtml(priority)}</span>` : "",
     `<span class="responsible-mini">${escapeHtml(responsibility)}</span>`,
@@ -709,6 +714,7 @@ function renderItemCard(item, options = {}) {
         <button class="card-toggle" type="button" data-action="open-detail" aria-label="Abrir detalhes de ${escapeAttr(item.title || "item")}">
           <div class="item-main-line">
             <div class="item-title-row">
+              ${sequence ? `<span class="item-sequence">${escapeHtml(sequence)}</span>` : ""}
               <h3>${escapeHtml(title)}</h3>
             </div>
             <div class="item-meta item-meta-right">
@@ -779,10 +785,11 @@ function renderDetailContent(item) {
   `;
 }
 
-function monthChip(item) {
+function monthChip(item, options = {}) {
   const tagColor = getTagColor(item.tag);
   const title = getItemDisplayTitle(item);
-  return `<button class="month-chip" type="button" data-open-occurrence="${escapeAttr(item.occurrenceId || item.id)}" data-tag-color="${tagColor}"><span>${escapeHtml(formatTimeRange(item) ? `${formatTimeRange(item)} · ${title}` : title)}</span></button>`;
+  const sequence = Number.isFinite(options.sequence) ? `${options.sequence}.` : "";
+  return `<button class="month-chip" type="button" data-open-occurrence="${escapeAttr(item.occurrenceId || item.id)}" data-tag-color="${tagColor}">${sequence ? `<span class="month-chip-sequence">${escapeHtml(sequence)}</span>` : ""}<span>${escapeHtml(formatTimeRange(item) ? `${formatTimeRange(item)} · ${title}` : title)}</span></button>`;
 }
 
 function renderHistoryItem(entry) {
