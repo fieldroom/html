@@ -1,9 +1,11 @@
 const CONFIG = {
   WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwdYPJRIQytV1mZ7IxkHgWrxm3DrZQXODdBmkBYaYASKlVReYijAMpgOYhZ4pHt9JTYPA/exec",
-  APP_VERSION: "1.0.18",
+  APP_VERSION: "1.0.19",
   DEMO_STORAGE_KEY: "portal-sp2-items-v1",
   DEMO_HISTORY_KEY: "portal-sp2-history-v1",
   CLOUD_CACHE_KEY: "portal-sp2-cloud-cache-v1",
+  ACCESS_SESSION_KEY: "portal-sp2-access-session",
+  ACCESS_PASSWORD: "esquadrao",
   ADMIN_SESSION_KEY: "portal-sp2-admin-session",
   LAST_ACTOR_KEY: "portal-sp2-last-actor",
 };
@@ -114,16 +116,32 @@ const state = {
     responsible: "all",
     sort: "datetime",
   },
+  searchQuery: "",
   editingOccurrence: null,
   detailOccurrence: null,
   lastSync: null,
   adminToken: "",
+  started: false,
 };
 
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   cacheElements();
+  bindAccessEvents();
+  if (!hasPortalAccess()) {
+    showAccessGate();
+    return;
+  }
+  startPortal();
+}
+
+function startPortal() {
+  if (state.started) return;
+  state.started = true;
+  els.accessGate.hidden = true;
+  els.appShell.hidden = false;
+  els.mobileFab.hidden = false;
   populateStaticControls();
   bindEvents();
   hydrateAdminSession();
@@ -136,6 +154,11 @@ async function init() {
 
 function cacheElements() {
   Object.assign(els, {
+    appShell: document.getElementById("appShell"),
+    accessGate: document.getElementById("accessGate"),
+    accessForm: document.getElementById("accessForm"),
+    accessPassword: document.getElementById("accessPassword"),
+    accessError: document.getElementById("accessError"),
     viewRoot: document.getElementById("viewRoot"),
     viewTitle: document.getElementById("viewTitle"),
     currentScopeLabel: document.getElementById("currentScopeLabel"),
@@ -146,6 +169,7 @@ function cacheElements() {
     priorityFilter: document.getElementById("priorityFilter"),
     responsibleFilter: document.getElementById("responsibleFilter"),
     sortFilter: document.getElementById("sortFilter"),
+    textSearch: document.getElementById("textSearch"),
     prevPeriodButton: document.getElementById("prevPeriodButton"),
     nextPeriodButton: document.getElementById("nextPeriodButton"),
     todayButton: document.getElementById("todayButton"),
@@ -173,7 +197,7 @@ function cacheElements() {
     itemCreatedBy: document.getElementById("itemCreatedBy"),
     responsibleName: document.getElementById("responsibleName"),
     itemLocation: document.getElementById("itemLocation"),
-    itemLink: document.getElementById("itemLink"),
+    itemLinks: [document.getElementById("itemLink1"), document.getElementById("itemLink2"), document.getElementById("itemLink3")],
     itemDescription: document.getElementById("itemDescription"),
     recurrenceEnabled: document.getElementById("recurrenceEnabled"),
     recurrenceFields: document.getElementById("recurrenceFields"),
@@ -231,6 +255,36 @@ function fillSelect(select, options) {
     .join("");
 }
 
+function bindAccessEvents() {
+  els.accessForm.addEventListener("submit", handleAccessSubmit);
+}
+
+function hasPortalAccess() {
+  return sessionStorage.getItem(CONFIG.ACCESS_SESSION_KEY) === "ok";
+}
+
+function showAccessGate() {
+  els.accessGate.hidden = false;
+  els.appShell.hidden = true;
+  els.mobileFab.hidden = true;
+  refreshIcons();
+  setTimeout(() => els.accessPassword.focus(), 80);
+}
+
+function handleAccessSubmit(event) {
+  event.preventDefault();
+  if (els.accessPassword.value.trim() !== CONFIG.ACCESS_PASSWORD) {
+    els.accessError.textContent = "Senha de acesso inválida.";
+    els.accessError.hidden = false;
+    els.accessPassword.select();
+    return;
+  }
+
+  sessionStorage.setItem(CONFIG.ACCESS_SESSION_KEY, "ok");
+  els.accessError.hidden = true;
+  startPortal();
+}
+
 function bindEvents() {
   document.querySelectorAll(".nav-item, .mobile-nav-brand").forEach((button) => {
     button.addEventListener("click", () => setView(button.dataset.view));
@@ -267,6 +321,10 @@ function bindEvents() {
   });
   els.sortFilter.addEventListener("change", () => {
     state.filters.sort = els.sortFilter.value;
+    render();
+  });
+  els.textSearch.addEventListener("input", () => {
+    state.searchQuery = els.textSearch.value.trim();
     render();
   });
 
@@ -432,7 +490,7 @@ function render() {
     history: renderHistoryView,
   };
 
-  els.viewRoot.innerHTML = renderers[state.view]();
+  els.viewRoot.innerHTML = getSearchQuery() ? renderSearchView() : renderers[state.view]();
   refreshIcons();
 }
 
@@ -442,6 +500,7 @@ function renderTopState() {
   });
 
   els.scopeDateInput.value = state.currentDate;
+  if (els.textSearch.value !== state.searchQuery) els.textSearch.value = state.searchQuery;
   const labels = {
     today: ["Hoje", "Painel principal"],
     month: ["Mês", formatMonthYear(state.currentDate)],
@@ -450,8 +509,9 @@ function renderTopState() {
     agenda: ["Programação", "Lista agrupada por dia"],
     history: ["Acesso Editor", "Acesso administrativo"],
   };
-  els.viewTitle.textContent = labels[state.view][0];
-  els.currentScopeLabel.textContent = labels[state.view][1];
+  const searchQuery = getSearchQuery();
+  els.viewTitle.textContent = searchQuery ? "Pesquisa" : labels[state.view][0];
+  els.currentScopeLabel.textContent = searchQuery ? "Resultados globais" : labels[state.view][1];
   els.syncLabel.textContent = CONFIG.WEB_APP_URL
     ? `Nuvem ${state.lastSync ? "sincronizada" : "pendente"}`
     : "Modo demonstração/local";
@@ -590,6 +650,23 @@ function renderHistoryView() {
       <div class="history-list">
         ${state.history.length ? state.history.map(renderHistoryItem).join("") : `<p class="empty-state">Sem histórico registrado.</p>`}
       </div>
+    </section>
+  `;
+}
+
+function renderSearchView() {
+  const query = getSearchQuery();
+  const results = getSearchResults(query);
+  const subtitle = `${results.length} resultado(s) para "${query}" · mais recentes primeiro`;
+
+  return `
+    <section class="section section-panel" aria-label="Pesquisa global">
+      ${renderSectionTitle("Pesquisa", subtitle)}
+      ${
+        results.length
+          ? `<div class="item-list search-result-list">${renderItemCards(results, { showDateInMeta: true })}</div>`
+          : `<p class="empty-state">Nenhum item encontrado para esta pesquisa.</p>`
+      }
     </section>
   `;
 }
@@ -735,6 +812,24 @@ function detailLine(icon, label, value) {
   return `<div class="detail-line"><i data-lucide="${icon}"></i><span><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</span></div>`;
 }
 
+function getItemLinks(item) {
+  const raw = item?.link;
+  const parsed = Array.isArray(item?.links) ? item.links : safeJson(raw, null);
+  const source = Array.isArray(parsed) ? parsed : raw ? [raw] : [];
+  const seen = new Set();
+
+  return source
+    .map((link) => String(link || "").trim())
+    .filter(Boolean)
+    .filter((link) => {
+      const key = link.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 3);
+}
+
 function openDetailModal(item) {
   state.detailOccurrence = item;
   els.detailModalTitle.textContent = getItemDisplayTitle(item);
@@ -748,6 +843,7 @@ function renderDetailContent(item) {
   const timeText = formatTimeRange(item) || "Sem horário";
   const dateText = item.occurrenceDate || item.date ? formatLongDate(item.occurrenceDate || item.date) : "Sem data definida";
   const responsibility = formatResponsible(item);
+  const links = getItemLinks(item);
   const statusBadges = [
     `<span class="badge tag-badge">${escapeHtml(item.tag || "Sem tag")}</span>`,
     item.priority && item.priority !== "Não aplicável" ? `<span class="badge ${priorityClass(item.priority)}">${escapeHtml(item.priority)}</span>` : "",
@@ -773,14 +869,27 @@ function renderDetailContent(item) {
       ${detailLine("align-left", "Descrição", item.description || "Sem descrição.")}
       ${detailLine("history", "Histórico resumido", getHistorySummary(item))}
     </div>
-    ${
-      item.link
-        ? `<a class="secondary-button link-button" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link"></i>Abrir link</a>`
-        : `<div class="detail-line"><i data-lucide="link"></i><span><strong>Link:</strong> Não informado.</span></div>`
-    }
+    ${renderDetailLinks(links)}
     <div class="detail-actions">
       <button class="secondary-button" type="button" data-detail-action="edit"><i data-lucide="pencil"></i>Editar</button>
       <button class="danger-button" type="button" data-detail-action="delete"><i data-lucide="trash-2"></i>Excluir</button>
+    </div>
+  `;
+}
+
+function renderDetailLinks(links) {
+  if (!links.length) {
+    return `<div class="detail-line"><i data-lucide="link"></i><span><strong>Links:</strong> Não informado.</span></div>`;
+  }
+
+  return `
+    <div class="detail-link-group" aria-label="Links do item">
+      ${links
+        .map(
+          (link, index) =>
+            `<a class="secondary-button link-button" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link"></i>${links.length > 1 ? `Abrir link ${index + 1}` : "Abrir link"}</a>`,
+        )
+        .join("")}
     </div>
   `;
 }
@@ -914,7 +1023,10 @@ function openItemModal(occurrence = null) {
   els.itemPriority.value = base.priority || "Não aplicável";
   els.itemCreatedBy.value = base.createdBy || localStorage.getItem(CONFIG.LAST_ACTOR_KEY) || "";
   els.itemLocation.value = base.location || "";
-  els.itemLink.value = base.link || "";
+  const links = getItemLinks(base);
+  els.itemLinks.forEach((input, index) => {
+    input.value = links[index] || "";
+  });
   els.itemDescription.value = base.description || "";
 
   const mode = base.responsibilityMode || "Todos";
@@ -1006,6 +1118,7 @@ function collectFormPayload() {
   const rule = getTagRule(tag);
   let date = els.itemDate.value;
   let startTime = els.itemStartTime.value;
+  const linkResult = collectFormLinks();
 
   if (!els.itemTitle.value.trim()) return { ok: false, error: "Informe o título do item." };
   if (!tag) return { ok: false, error: "Selecione a tag/categoria." };
@@ -1019,6 +1132,7 @@ function collectFormPayload() {
   if (els.recurrenceEnabled.checked && !date) {
     return { ok: false, error: "Itens recorrentes precisam de data inicial." };
   }
+  if (!linkResult.ok) return linkResult;
 
   const item = {
     type: rule.type,
@@ -1033,7 +1147,7 @@ function collectFormPayload() {
     responsibilityMode,
     responsibleName: responsibilityMode === "Individual" ? els.responsibleName.value : "",
     location: els.itemLocation.value.trim(),
-    link: els.itemLink.value.trim(),
+    link: encodeItemLinks(linkResult.links),
     description: els.itemDescription.value.trim(),
     recurrence: collectRecurrence(),
   };
@@ -1055,6 +1169,49 @@ function collectRecurrence() {
     until: endMode === "on" ? els.recurrenceUntil.value : "",
     count: endMode === "after" ? Number(els.recurrenceCount.value) || 1 : "",
   };
+}
+
+function collectFormLinks() {
+  const values = els.itemLinks.map((input) => input.value.trim()).filter(Boolean);
+  const normalized = [];
+  const seen = new Set();
+
+  for (const value of values) {
+    const result = normalizeLinkInput(value);
+    if (!result.ok) return result;
+    const key = result.url.toLowerCase();
+    if (seen.has(key)) return { ok: false, error: "Informe até 3 links distintos, sem repetir o mesmo endereço." };
+    seen.add(key);
+    normalized.push(result.url);
+  }
+
+  return { ok: true, links: normalized.slice(0, 3) };
+}
+
+function normalizeLinkInput(value) {
+  try {
+    const url = new URL(value);
+    if (!["http:", "https:"].includes(url.protocol)) {
+      return { ok: false, error: "Os links devem começar com http:// ou https://." };
+    }
+    return { ok: true, url: url.toString() };
+  } catch {
+    return { ok: false, error: "Confira os links informados. Use URLs completas começando com http:// ou https://." };
+  }
+}
+
+function encodeItemLinks(links) {
+  if (!links.length) return "";
+  if (links.length === 1) return links[0];
+  return JSON.stringify(links);
+}
+
+function normalizeStoredLinks(value) {
+  if (Array.isArray(value)) return encodeItemLinks(value.map((link) => String(link || "").trim()).filter(Boolean).slice(0, 3));
+  if (!value) return "";
+  const parsed = safeJson(value, null);
+  if (Array.isArray(parsed)) return encodeItemLinks(parsed.map((link) => String(link || "").trim()).filter(Boolean).slice(0, 3));
+  return String(value || "").trim();
 }
 
 function updateResponsibleControls() {
@@ -1792,6 +1949,75 @@ function getPreviousOccurrences() {
   return applyFilters(buildOccurrences(start, end)).sort(compareItemsNewestFirst);
 }
 
+function getSearchQuery() {
+  return state.searchQuery.trim();
+}
+
+function getSearchResults(query) {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) return [];
+
+  const range = getSearchRange();
+  const seen = new Set();
+  return applyFilters(buildOccurrences(range.start, range.end, { includeUndated: true }))
+    .filter((item) => matchesTextSearch(item, normalizedQuery))
+    .filter((item) => {
+      const key = `${item.occurrenceId || item.id}|${item.occurrenceDate || item.date || ""}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort(compareItemsNewestFirst);
+}
+
+function getSearchRange() {
+  const today = toISODate(new Date());
+  const activeItems = getActiveItems();
+  const dates = activeItems
+    .flatMap((item) => [item.date, item.recurrence?.until, item.recurrenceOriginalDate])
+    .map(sanitizeDateValue)
+    .filter(Boolean)
+    .sort();
+
+  const fallbackStart = addDaysISO(today, -3650);
+  const fallbackEnd = addDaysISO(today, 730);
+  const firstDate = dates[0] || fallbackStart;
+  const lastDate = dates[dates.length - 1] || fallbackEnd;
+
+  return {
+    start: firstDate || fallbackStart,
+    end: lastDate > fallbackEnd ? lastDate : fallbackEnd,
+  };
+}
+
+function matchesTextSearch(item, normalizedQuery) {
+  return getSearchableText(item).includes(normalizedQuery);
+}
+
+function getSearchableText(item) {
+  return normalizeSearchText(
+    [
+      item.title,
+      item.description,
+      item.location,
+      item.tag,
+      item.priority,
+      item.createdBy,
+      formatResponsible(item),
+      item.responsibleName,
+      getItemLinks(item).join(" "),
+    ].join(" "),
+  );
+}
+
+function normalizeSearchText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 function applyFiltersAndSort(items) {
   return applyFilters(items).sort(compareItems);
 }
@@ -1887,7 +2113,7 @@ function normalizeItem(item) {
     responsibilityMode: item.responsibilityMode || "Todos",
     responsibleName: item.responsibleName || "",
     location: item.location || "",
-    link: item.link || "",
+    link: normalizeStoredLinks(item.link || item.links || ""),
     description: item.description || "",
     recurrence: normalizeRecurrence(item.recurrence),
     recurrenceParentId: item.recurrenceParentId || "",
