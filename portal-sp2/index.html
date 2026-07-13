@@ -6,7 +6,7 @@
     <meta name="color-scheme" content="light" />
     <title>Portal SP2</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="styles.css?v=1.0.19" />
+    <link rel="stylesheet" href="styles.css?v=1.0.20" />
   </head>
   <body>
     <div id="accessGate" class="access-gate">
@@ -313,22 +313,30 @@
               <label><input type="checkbox" value="0" />Dom</label>
             </fieldset>
 
-            <fieldset class="field field-wide fieldset">
+            <fieldset class="field field-wide fieldset recurrence-end-fieldset">
               <legend>Término</legend>
-              <label class="choice-row">
-                <input type="radio" name="recurrenceEndMode" value="never" checked />
-                <span>Sem fim definido</span>
-              </label>
-              <label class="choice-row">
-                <input type="radio" name="recurrenceEndMode" value="on" />
-                <span>Data de término</span>
-              </label>
-              <input id="recurrenceUntil" name="recurrenceUntil" type="date" disabled />
-              <label class="choice-row">
-                <input type="radio" name="recurrenceEndMode" value="after" />
-                <span>Número de ocorrências</span>
-              </label>
-              <input id="recurrenceCount" name="recurrenceCount" type="number" min="1" max="500" value="10" disabled />
+              <div class="recurrence-end-options">
+                <div class="recurrence-end-option recurrence-end-option-simple">
+                  <label class="choice-row">
+                    <input type="radio" name="recurrenceEndMode" value="never" checked />
+                    <span>Sem fim definido</span>
+                  </label>
+                </div>
+                <div class="recurrence-end-option">
+                  <label class="choice-row">
+                    <input type="radio" name="recurrenceEndMode" value="on" />
+                    <span>Data de término</span>
+                  </label>
+                  <input id="recurrenceUntil" name="recurrenceUntil" type="date" aria-label="Data de término da recorrência" disabled />
+                </div>
+                <div class="recurrence-end-option">
+                  <label class="choice-row">
+                    <input type="radio" name="recurrenceEndMode" value="after" />
+                    <span>Número de ocorrências</span>
+                  </label>
+                  <input id="recurrenceCount" name="recurrenceCount" type="number" min="1" max="500" value="10" aria-label="Número de ocorrências" disabled />
+                </div>
+              </div>
             </fieldset>
           </div>
         </section>
@@ -440,6 +448,6 @@
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-    <script src="app.js?v=1.0.19" defer></script>
+    <script src="app.js?v=1.0.20" defer></script>
   </body>
 </html>

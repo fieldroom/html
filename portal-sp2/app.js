@@ -1,6 +1,6 @@
 const CONFIG = {
   WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwdYPJRIQytV1mZ7IxkHgWrxm3DrZQXODdBmkBYaYASKlVReYijAMpgOYhZ4pHt9JTYPA/exec",
-  APP_VERSION: "1.0.19",
+  APP_VERSION: "1.0.20",
   DEMO_STORAGE_KEY: "portal-sp2-items-v1",
   DEMO_HISTORY_KEY: "portal-sp2-history-v1",
   CLOUD_CACHE_KEY: "portal-sp2-cloud-cache-v1",
@@ -414,9 +414,11 @@ async function loadItems(options = {}) {
     renderLoading();
   }
   try {
+    const pendingItems = state.items.filter((item) => pendingCreateIds.has(item.id));
     const result = await apiRequest("listItems", {});
     if (!result.ok) throw new Error(result.error || "Falha ao listar itens.");
-    state.items = (result.items || []).map(normalizeItem);
+    const cloudItems = (result.items || []).map(normalizeItem);
+    state.items = cloudItems.concat(pendingItems.filter((pending) => !cloudItems.some((item) => item.id === pending.id)));
     state.lastSync = result.serverNow || new Date().toISOString();
     cacheCloudItems();
   } catch (error) {
@@ -838,8 +840,6 @@ function openDetailModal(item) {
 }
 
 function renderDetailContent(item) {
-  const tagColor = getTagColor(item.tag);
-  const title = getItemDisplayTitle(item);
   const timeText = formatTimeRange(item) || "Sem horário";
   const dateText = item.occurrenceDate || item.date ? formatLongDate(item.occurrenceDate || item.date) : "Sem data definida";
   const responsibility = formatResponsible(item);
@@ -853,11 +853,8 @@ function renderDetailContent(item) {
     .join("");
 
   return `
-    <div class="detail-hero" data-tag-color="${tagColor}">
-      <div>
-        <h3>${escapeHtml(title)}</h3>
-        <div class="badge-row">${statusBadges}</div>
-      </div>
+    <div class="detail-hero">
+      <div class="badge-row">${statusBadges}</div>
     </div>
     <div class="detail-grid">
       ${detailLine("calendar", "Data", dateText)}
@@ -1069,36 +1066,86 @@ async function handleItemSubmit(event) {
     return;
   }
 
+  const actor = payload.item.createdBy;
+  localStorage.setItem(CONFIG.LAST_ACTOR_KEY, actor);
+  if (!state.editingOccurrence) {
+    createItemOptimistically(payload.item, actor);
+    return;
+  }
+
   try {
-    const actor = payload.item.createdBy;
-    localStorage.setItem(CONFIG.LAST_ACTOR_KEY, actor);
-    if (state.editingOccurrence) {
-      let scope = "series";
-      if (requiresRecurrenceScope(state.editingOccurrence)) {
-        scope = await askScope("Editar item recorrente");
-        if (!scope) return;
-      }
-      const result = await mutate("editItem", {
-        id: state.editingOccurrence.id,
-        occurrenceDate: state.editingOccurrence.occurrenceDate || state.editingOccurrence.date,
-        scope,
-        item: payload.item,
-        actor,
-      });
-      syncMutatedItem(result);
-      toast("Item editado com sucesso. A atualização já está disponível para todos os usuários.", "success");
-    } else {
-      const result = await mutate("createItem", { item: payload.item, actor });
-      syncMutatedItem(result);
-      toast("Item adicionado com sucesso. Ele já está disponível para todos os usuários.", "success");
+    let scope = "series";
+    if (requiresRecurrenceScope(state.editingOccurrence)) {
+      scope = await askScope("Editar item recorrente");
+      if (!scope) return;
     }
+    const result = await mutate("editItem", {
+      id: state.editingOccurrence.id,
+      adminToken: state.adminToken,
+      occurrenceDate: state.editingOccurrence.occurrenceDate || state.editingOccurrence.date,
+      scope,
+      item: payload.item,
+      actor,
+    });
+    syncMutatedItem(result);
+    toast("Item editado com sucesso. A atualização já está disponível para todos os usuários.", "success");
     closeModal(els.itemModal);
     render();
-    loadItems({ renderAfter: true });
+    scheduleCloudReconciliation();
   } catch (error) {
     console.error(error);
     toast(error.message || "Não foi possível salvar. Verifique sua conexão e tente novamente.", "error");
   }
+}
+
+const pendingCreateIds = new Set();
+let cloudReconciliationTimer = null;
+
+async function createItemOptimistically(item, actor) {
+  const optimisticId = createId("sync");
+  const timestamp = new Date().toISOString();
+  const optimisticItem = normalizeItem({
+    ...item,
+    id: optimisticId,
+    active: true,
+    deleted: false,
+    status: "active",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    exceptionDates: [],
+    completedOccurrences: {},
+  });
+
+  pendingCreateIds.add(optimisticId);
+  state.items.push(optimisticItem);
+  state.lastSync = timestamp;
+  cacheCloudItems();
+  closeModal(els.itemModal);
+  render();
+  toast("Item adicionado. Sincronizando com os demais usuários...", "success");
+
+  try {
+    const result = await mutate("createItem", { item, actor });
+    pendingCreateIds.delete(optimisticId);
+    state.items = state.items.filter((current) => current.id !== optimisticId);
+    syncMutatedItem(result);
+    render();
+    toast("Item sincronizado e disponível para todos os usuários.", "success");
+    scheduleCloudReconciliation();
+  } catch (error) {
+    pendingCreateIds.delete(optimisticId);
+    state.items = state.items.filter((current) => current.id !== optimisticId);
+    cacheCloudItems();
+    render();
+    showModal(els.itemModal);
+    showFormError(error.message || "Não foi possível salvar. Verifique sua conexão e tente novamente.");
+    toast("Não foi possível sincronizar o item.", "error");
+  }
+}
+
+function scheduleCloudReconciliation(delay = 1200) {
+  clearTimeout(cloudReconciliationTimer);
+  cloudReconciliationTimer = setTimeout(() => loadItems({ renderAfter: true }), delay);
 }
 
 function syncMutatedItem(result) {
@@ -1272,6 +1319,7 @@ async function deleteOccurrence(occurrence) {
   try {
     await mutate("deleteItem", {
       id: occurrence.id,
+      adminToken: state.adminToken,
       occurrenceDate: occurrence.occurrenceDate || occurrence.date,
       scope,
       actor: confirmed.actor,

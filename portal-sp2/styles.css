@@ -696,11 +696,14 @@ select:disabled {
 }
 
 .item-sequence {
-  flex: 0 0 auto;
+  flex: 0 0 2.7ch;
+  width: 2.7ch;
   color: #64748b;
   font-size: 0.88rem;
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
   line-height: 1.25;
+  text-align: right;
 }
 
 .item-title-row h3 {
@@ -858,11 +861,6 @@ select:disabled {
   align-items: flex-start;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
-}
-
-.detail-hero h3 {
-  margin: 0 0 8px;
-  font-size: 1.12rem;
 }
 
 .detail-line {
@@ -1347,6 +1345,51 @@ select:disabled {
   border-radius: var(--radius);
 }
 
+.recurrence-end-fieldset {
+  gap: 0;
+}
+
+.recurrence-end-options {
+  display: grid;
+  gap: 0;
+}
+
+.recurrence-end-option {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 260px);
+  gap: 14px;
+  align-items: center;
+  min-height: 54px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.recurrence-end-option:last-child {
+  border-bottom: 0;
+}
+
+.recurrence-end-option-simple .choice-row {
+  grid-column: 1 / -1;
+}
+
+.recurrence-end-option .choice-row {
+  min-width: 0;
+  min-height: 40px;
+}
+
+.recurrence-end-option .choice-row input[type="radio"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.recurrence-end-option > input {
+  min-width: 0;
+}
+
 .weekday-picker {
   display: flex;
   flex-wrap: wrap;
@@ -1628,6 +1671,18 @@ select:disabled {
   .form-grid,
   .recurrence-fields {
     grid-template-columns: 1fr;
+  }
+
+  .recurrence-end-option {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    align-items: stretch;
+    padding: 8px 0;
+  }
+
+  .recurrence-end-option > input {
+    width: calc(100% - 26px);
+    margin-left: 26px;
   }
 
   .modal-panel {
